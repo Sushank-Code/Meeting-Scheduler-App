@@ -37,8 +37,9 @@ class Account(AbstractBaseUser,PermissionsMixin):
 
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=50)
-    profile_picture = models.ImageField(upload_to='Profile/',blank=True)
+    provider = models.CharField(max_length=50, blank=True, default="")
+    provider_id = models.CharField(max_length=255, blank=True, default="")
+    profile_picture = models.URLField(blank=True, default="")
 
     is_active = models.BooleanField(default=True)   # True = only for oauth authentication
     is_staff = models.BooleanField(default=False)

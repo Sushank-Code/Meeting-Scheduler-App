@@ -147,7 +147,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"     # For Production
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-CORS_ALLOW_ALL_ORIGINS: True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173'
+]
+CORS_ALLOW_CREDENTIALS = True
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.Account'
@@ -178,10 +181,11 @@ DJOSER = {
     'TOKEN_MODEL' : None,  
 
     'SOCIAL_AUTH_TOKEN_STRATEGY': 'djoser.social.token.jwt.TokenStrategy',        
-    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': ["http://127.0.0.1:8000/auth/o/google-oauth2/","http://localhost:3000"],
+    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': ["http://127.0.0.1:8000/auth/o/google-oauth2/","http://localhost:5173/auth/google/callback"],
 
     'SERIALIZERS' :{
         'user': 'accounts.serializers.UserSerializer',
+        'current_user': 'accounts.serializers.UserSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer',
     },
 
@@ -202,7 +206,8 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     "https://www.googleapis.com/auth/userinfo.profile",
     "openid",
 ]
-SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["id_token","scope"]  # Extra data Found in social_auth - User Social auths
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["id_token","scope"]  
+# Extra data Found in social_auth - User Social auths
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',        

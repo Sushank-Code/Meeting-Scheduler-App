@@ -1,8 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContextProvider'
 
 const Navbar = () => {
-  const isLoggedIn = Boolean(localStorage.getItem('authToken'))
+  const { isLoggedIn, logout,user } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 px-4 py-4 sm:px-6">
@@ -22,10 +23,7 @@ const Navbar = () => {
         <div className="hidden items-center gap-2 rounded-full bg-slate-100/80 p-1 md:flex">
           {isLoggedIn ? (
             <>
-              <Link to="/" className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white">
-                Dashboard
-              </Link>
-              <Link to="/" className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-white hover:text-slate-900">
+              <Link to="/meeting" className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-white hover:text-slate-900">
                 Meetings
               </Link>
               <Link to="/" className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-white hover:text-slate-900">
@@ -53,14 +51,30 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           {isLoggedIn ? (
             <>
-              <button className="relative hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-slate-300 hover:text-slate-900 md:flex">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-emerald-500"></span>
-              </button>
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-cyan-500 text-sm font-semibold text-white shadow-lg shadow-blue-200">
-                RK
+              <div className="group relative">
+                <div className="flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-lg shadow-slate-300/50 ring-1 ring-slate-200 transition hover:ring-slate-300">
+                  <img
+                    src={user?.profile_picture}
+                    alt="Profile"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="pointer-events-none absolute right-0 top-full pt-3 opacity-0 transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
+                  <div className="w-44 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-900/10">
+                    <Link
+                      to="/dashboard"
+                      className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="mt-1 block rounded-xl px-3 py-2 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </div>
             </>
           ) : (

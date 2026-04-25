@@ -4,7 +4,7 @@ import { googleAuth } from '../../services/api'
 import { useAuth } from '../../context/AuthContextProvider'
 
 const Home = () => {
-  const { SignupWithGoogle } = useAuth()
+  const { SignupWithGoogle, isLoggedIn } = useAuth()
 
   return (
     <div className="relative overflow-hidden">
@@ -18,19 +18,25 @@ const Home = () => {
             MeetSync helps you organize, schedule, and manage your meetings with ease.
             Collaborate with your team seamlessly and never miss an important appointment again.
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button onClick={SignupWithGoogle} className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-white border border-blue-600 hover:border-gray-300 transition-all duration-200 rounded-lg px-6 py-3 cursor-pointer group">
-              <img src={googleLogo} alt="Google" className="w-5 h-5" />
-              <span className="text-white group-hover:text-gray-700 font-medium">Sign up with Google</span>
-            </button>
-            <button className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-white border border-blue-600 hover:border-gray-300 transition-all duration-200 rounded-lg px-6 py-3 cursor-pointer group">
-              <img src={facebookLogo} alt="Facebook" className="w-5 h-5" />
-              <span className="text-white group-hover:text-gray-700 font-medium">Sign up with Facebook</span>
-            </button>
-          </div>
         </div>
-
+        {isLoggedIn ? (
+          <p className="text-green-600 font-medium">
+            You are already logged in!
+          </p>
+        ) : (
+          <>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button onClick={SignupWithGoogle} className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-white border border-blue-600 hover:border-gray-300 transition-all duration-200 rounded-lg px-6 py-3 cursor-pointer group">
+                <img src={googleLogo} alt="Google" className="w-5 h-5" />
+                <span className="text-white group-hover:text-gray-700 font-medium">Sign up with Google</span>
+              </button>
+              <button className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-white border border-blue-600 hover:border-gray-300 transition-all duration-200 rounded-lg px-6 py-3 cursor-pointer group">
+                <img src={facebookLogo} alt="Facebook" className="w-5 h-5" />
+                <span className="text-white group-hover:text-gray-700 font-medium">Sign up with Facebook</span>
+              </button>
+            </div>
+          </>
+        )}
         <div className="flex-1 flex justify-center lg:justify-end">
           <img
             src={heroImage}

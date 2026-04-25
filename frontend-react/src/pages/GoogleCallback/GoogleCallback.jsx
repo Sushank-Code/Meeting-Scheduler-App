@@ -11,7 +11,7 @@ const GoogleCallback = () => {
         const callbackKey = `google-callback-${location.search}`
         if (sessionStorage.getItem(callbackKey)) return
         sessionStorage.setItem(callbackKey, 'done')
-
+                 
         const run = async () => {
             try {
                 await CompleteGoogleLogin(location.search)

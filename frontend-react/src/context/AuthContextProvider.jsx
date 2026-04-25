@@ -70,11 +70,11 @@ const AuthContextProvider = ({ children }) => {
     const value = {
         user,
         setUser,
+        isLoggedIn,
+        setisLoggedIn,
         getMe,
         SignupWithGoogle,
         CompleteGoogleLogin,
-        isLoggedIn,
-        setisLoggedIn,
         logout,
     }
     return (

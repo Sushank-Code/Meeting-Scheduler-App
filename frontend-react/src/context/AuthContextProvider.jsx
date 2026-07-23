@@ -38,9 +38,9 @@ const AuthContextProvider = ({ children }) => {
         window.location.href = authorization_url
     }
 
-    const redirect_uri = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+    // const redirect_uri = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
     const CompleteGoogleLogin = async (search) => {
-        const params = new URLSearchParams(search)         // {name: "John Doe", age: 30
+        const params = new URLSearchParams(search)         // {name: "John Doe", age: 30 }
         // const queryString = params.toString()           // "name=John+Doe&age=30"  
 
         const code = params.get('code');

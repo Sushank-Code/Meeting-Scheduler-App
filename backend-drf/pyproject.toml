@@ -1,0 +1,32 @@
+[project]
+name = "backend-drf"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "asgiref==3.11.1",
+    "certifi==2026.2.25",
+    "cffi==2.0.0",
+    "charset-normalizer==3.4.6",
+    "cryptography==46.0.6",
+    "defusedxml==0.7.1",
+    "django==6.0.3",
+    "django-cors-headers==4.9.0",
+    "djangorestframework==3.17.0",
+    "djangorestframework-simplejwt==5.5.1",
+    "djoser==2.3.3",
+    "idna==3.11",
+    "oauthlib==3.3.1",
+    "pillow==12.1.1",
+    "psycopg2==2.9.11",
+    "pycparser==3.0",
+    "pyjwt==2.12.1",
+    "python-decouple==3.8",
+    "python3-openid==3.2.0",
+    "requests==2.33.0",
+    "requests-oauthlib==2.0.0",
+    "social-auth-app-django==5.7.0",
+    "social-auth-core==4.8.5",
+    "sqlparse==0.5.5",
+    "tzdata==2025.3",
+    "urllib3==2.6.3",
+]

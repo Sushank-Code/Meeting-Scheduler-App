@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from accounts.models import Account
+from django.core.validators import MinLengthValidator
 
 
 class Meeting (models.Model):
@@ -8,7 +9,7 @@ class Meeting (models.Model):
     organizer = models.ForeignKey(Account, on_delete=models.CASCADE)
 
     meeting_id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False,unique=True)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200,validators=[MinLengthValidator(3)])
     description = models.TextField(null=True,blank=True)
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()

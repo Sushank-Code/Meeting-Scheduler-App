@@ -43,7 +43,7 @@ class Meeting (models.Model):
 
 class Participant(models.Model):
 
-    meeting = models.ForeignKey(Meeting,on_delete=models.CASCADE)
+    meeting = models.ForeignKey(Meeting,on_delete=models.CASCADE,related_name='participant')
 
     user = models.ForeignKey(Account,on_delete=models.SET_NULL,null=True,blank=True)
 

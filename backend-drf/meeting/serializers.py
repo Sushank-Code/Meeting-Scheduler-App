@@ -5,7 +5,7 @@ from meeting.models import Meeting, Participant
 
 class MeetingSerializer(serializers.ModelSerializer):
 
-    invited_emails = serializers.ListField(
+    invited_emails = serializers.ListField( 
         child=serializers.EmailField(),
         write_only=True
     )
@@ -66,7 +66,6 @@ class MeetingSerializer(serializers.ModelSerializer):
         return meeting        
 
     def get_user_role(self, obj):       # obj is the Meeting instance.
-
         request = self.context.get('request')
         if request and obj.organizer == request.user:
             return 'organizer'

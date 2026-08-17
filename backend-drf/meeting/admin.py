@@ -8,4 +8,4 @@ class MeetingAdmin(admin.ModelAdmin):
     list_filter = ['location_type']
     readonly_fields = ['created_at','updated_at']
     
-admin.site.register(Participant)
+admin.site.register(Participant) 

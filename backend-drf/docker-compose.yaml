@@ -14,5 +14,21 @@ services:
     volumes:
       - meetscheduler_volume:/var/lib/postgresql/data
 
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis-container
+    ports:
+      - "${REDIS_PORT}:6379"
+      - "${REDIS_INSIGHT_PORT}:8001"
+    restart: unless-stopped
+    volumes:
+      - meetscheduler_redis_volume:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   meetscheduler_volume:
+  meetscheduler_redis_volume:

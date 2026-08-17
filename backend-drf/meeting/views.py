@@ -11,10 +11,10 @@ from meeting.serializers import MeetingSerializer
 
 class MeetingView(viewsets.ModelViewSet):
     serializer_class = MeetingSerializer
-
+ 
     # get
     def get_queryset(self):
         user = self.request.user
         organized = Meeting.objects.filter(organizer=user)
         participated = Meeting.objects.filter(participant__user=user)
-        return (organized | participated).distinct()
+        return (organized | participated).distinct()                  

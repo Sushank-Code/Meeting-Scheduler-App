@@ -204,9 +204,14 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config("GOOGLE_SECRET")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/calendar.events",
     "openid",
 ]
-SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["id_token","scope"]  
+SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {
+    "access_type": "offline",
+    "prompt": "consent",
+}
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["id_token", "scope", "refresh_token"]
 # Extra data Found in social_auth - User Social auths
 
 SOCIAL_AUTH_PIPELINE = (

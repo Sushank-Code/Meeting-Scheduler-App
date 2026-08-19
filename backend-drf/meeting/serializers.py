@@ -63,13 +63,14 @@ class MeetingSerializer(serializers.ModelSerializer):
                 email = email,
                 rsvp_status = 'pending'
             )
-
-        # This decides whether to queue the Celery task or not.
-        # transaction.on_commit(...) means:
-        # “Run this Celery task only after Django has successfully saved the meeting to the database.”
-        
+            
+        meeting_id = str(meeting.meeting_id)
         if meeting.location_type == 'google_meet':
-            meeting_id = str(meeting.meeting_id)
+            transaction.on_commit(
+                lambda: generate_meeting_link_task.delay(meeting_id)
+            )
+
+        if meeting.location_type == 'zoom':
             transaction.on_commit(
                 lambda: generate_meeting_link_task.delay(meeting_id)
             )

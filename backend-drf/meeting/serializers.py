@@ -98,6 +98,10 @@ class MeetingSerializer(serializers.ModelSerializer):
             meeting = super().update(instance, validated_data)
 
             if invited_emails is not None:
+                Participant.objects.filter(meeting=meeting).exclude(
+                    email__in=invited_emails
+                ).delete()
+
                 for email in invited_emails:
                     user = Account.objects.filter(email=email).first()
                     Participant.objects.get_or_create(

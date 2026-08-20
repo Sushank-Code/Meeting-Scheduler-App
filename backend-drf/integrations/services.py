@@ -18,22 +18,23 @@ def google_meet_link(meeting):
 
     try:
         from googleapiclient.discovery import build
+
         social_auth = UserSocialAuth.objects.get(
             user=meeting.organizer,
             provider='google-oauth2',
         )
+
         token_data = social_auth.extra_data
         access_token = token_data.get('access_token')
+
         if not access_token:
             raise ValueError(
                 'Connect Google Calendar before scheduling a Google Meet meeting.')
+        
         if CALENDAR_EVENTS_SCOPE not in token_data.get('scope', '').split():
             raise ValueError(
                 'Reconnect Google Calendar to grant calendar event access.')
 
-        # A personal Gmail calendar must be accessed with the organizer's OAuth
-        # credential. A service account has its own calendar and cannot create
-        # Meet conferences on behalf of a personal Google account.
         credentials = Credentials(
             token=access_token,
             refresh_token=token_data.get('refresh_token'),
@@ -52,11 +53,6 @@ def google_meet_link(meeting):
 
         service = build('calendar', 'v3', credentials=credentials)
 
-        # Format the event data Google Calendar API expects ISO 8601 format
-        # for start and end datetime
-
-        # Meeting does not store a timezone.  Use Django's configured timezone
-        # while retaining the offset included in the ISO 8601 datetimes.
         meeting_timezone = getattr(
             meeting, 'meet_timezone', None) or timezone.get_current_timezone_name()
 
@@ -97,8 +93,7 @@ def google_meet_link(meeting):
         if meet_link:
             # save to meeting model and return
             meeting.meeting_link = meet_link
-            # only update the specific column
-            meeting.save(update_fields=['meeting_link'])
+            meeting.save(update_fields=['meeting_link'])   # only update the specific column
             return meet_link
 
         return None
@@ -110,17 +105,6 @@ def google_meet_link(meeting):
 
 
 def get_zoom_access_token():
-    """
-    Zoom Server-to-Server OAuth requires getting
-    an access token first before calling any API.
-
-    How it works:
-    - You send your Account ID, Client ID, Client Secret
-    - Zoom returns a temporary access token
-    - Token expires in 1 hour
-    - You use this token in the Authorization header
-      for all subsequent Zoom API calls
-    """
 
     ZOOM_ACCOUNT_ID = config('ZOOM_ACCOUNT_ID')
     ZOOM_CLIENT_ID = config('ZOOM_CLIENT_ID')
@@ -144,31 +128,11 @@ def get_zoom_access_token():
         raise RuntimeError('Zoom did not return an access token.')
     return access_token
 
-
 def zoom_link(meeting):
-    """
-    Calls Zoom API to create a Zoom meeting.
-    Returns the join URL string or None if it fails.
-
-    How it works:
-    - First get an access token using credentials
-    - Then call Zoom create meeting endpoint
-    - Zoom returns a join_url
-    - Save join_url to meeting.meeting_link
-    """
 
     try:
-        # -----------------------------------------------
-        # Step 1 - Get access token first
-        # all Zoom API calls need this token
-        # -----------------------------------------------
         access_token = get_zoom_access_token()
 
-        # -----------------------------------------------
-        # Step 2 - Format meeting data for Zoom API
-        # Zoom expects start_time in ISO 8601 format
-        # duration in minutes as an integer
-        # -----------------------------------------------
         duration_minutes = int(
             (meeting.end_datetime - meeting.start_datetime).total_seconds() / 60
         )
@@ -178,9 +142,6 @@ def zoom_link(meeting):
         meeting_data = {
             'topic': meeting.title,
             'type': 2,
-            # type 2 = scheduled meeting
-            # type 1 = instant meeting
-            # type 3 = recurring with no fixed time
             'start_time': meeting.start_datetime.isoformat(),
             'duration': duration_minutes,
             'timezone': meeting_timezone,
@@ -189,16 +150,9 @@ def zoom_link(meeting):
                 'host_video': True,
                 'participant_video': True,
                 'join_before_host': True,
-                # join_before_host allows participants
-                # to join before organizer arrives
             }
         }
 
-        # -----------------------------------------------
-        # Step 3 - Call Zoom create meeting endpoint
-        # /users/me/meetings creates meeting for
-        # the authenticated user (your service account)
-        # -----------------------------------------------
         headers = {
             'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json'
@@ -211,12 +165,6 @@ def zoom_link(meeting):
             timeout=15,
         )
 
-        # -----------------------------------------------
-        # Step 4 - Extract join_url from response
-        # join_url is what participants use to join
-        # start_url is what the host uses to start
-        # we only need join_url for our purpose
-        # -----------------------------------------------
         if response.status_code == 201:
             zoom_meeting = response.json()
             join_url = zoom_meeting.get('join_url')

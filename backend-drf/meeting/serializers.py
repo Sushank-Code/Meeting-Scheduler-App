@@ -17,12 +17,32 @@ class MeetingSerializer(serializers.ModelSerializer):
         fields = ['meeting_id', 'title', 'description', 'start_datetime', 'end_datetime','duration','location_type','meeting_link', 'status', 'agenda', 'meeting_notes', 'created_at', 'updated_at', 'invited_emails','user_role']
 
         read_only_fields = ['meeting_id','duration','meeting_link','status','created_at','updated_at','user_role']
+        
+        extra_kwargs = {
+            'location_type': {'required': False},
+        }
 
     def validate(self, data):
-        startDateTime = data.get('start_datetime')
-        endDateTime = data.get('end_datetime')
 
-        if (endDateTime <= startDateTime):
+        if self.instance and 'location_type' in self.initial_data:
+            raise serializers.ValidationError(
+                {'location_type': 'Meeting location cannot be changed after creation.'}
+            )
+        if self.instance and 'meeting_link' in self.initial_data:
+            raise serializers.ValidationError(
+                {'meeting_link': 'Meeting link cannot be changed manually.'}
+            )
+
+        startDateTime = data.get(
+            'start_datetime',
+            getattr(self.instance, 'start_datetime', None),
+        )
+        endDateTime = data.get(
+            'end_datetime',
+            getattr(self.instance, 'end_datetime', None),
+        )
+
+        if startDateTime and endDateTime and endDateTime <= startDateTime:
             raise serializers.ValidationError('End Time must be after start time ')
 
         return data
@@ -51,7 +71,6 @@ class MeetingSerializer(serializers.ModelSerializer):
         meeting = Meeting.objects.create(organizer=orgainzer,**validated_data)   
 
         for email in invited_emails:
-
             try:
                 user = Account.objects.get(email=email)
             except Account.DoesNotExist:
@@ -71,6 +90,23 @@ class MeetingSerializer(serializers.ModelSerializer):
             )
 
         return meeting        
+
+    def update(self, instance, validated_data):
+        invited_emails = validated_data.pop('invited_emails', None)
+
+        with transaction.atomic():
+            meeting = super().update(instance, validated_data)
+
+            if invited_emails is not None:
+                for email in invited_emails:
+                    user = Account.objects.filter(email=email).first()
+                    Participant.objects.get_or_create(
+                        meeting=meeting,
+                        email=email,
+                        defaults={'user': user, 'rsvp_status': 'pending'},
+                    )
+
+        return meeting
 
     def get_user_role(self, obj):       # obj is the Meeting instance.
         request = self.context.get('request')

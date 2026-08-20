@@ -65,12 +65,7 @@ class MeetingSerializer(serializers.ModelSerializer):
             )
             
         meeting_id = str(meeting.meeting_id)
-        if meeting.location_type == 'google_meet':
-            transaction.on_commit(
-                lambda: generate_meeting_link_task.delay(meeting_id)
-            )
-
-        if meeting.location_type == 'zoom':
+        if meeting.location_type in ['google_meet', 'zoom']:
             transaction.on_commit(
                 lambda: generate_meeting_link_task.delay(meeting_id)
             )

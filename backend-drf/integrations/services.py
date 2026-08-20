@@ -122,24 +122,27 @@ def get_zoom_access_token():
       for all subsequent Zoom API calls
     """
 
-    ZOOM_ACCOUNT_ID  = config('ZOOM_ACCOUNT_ID')
-    ZOOM_CLIENT_ID   = config('ZOOM_CLIENT_ID')
+    ZOOM_ACCOUNT_ID = config('ZOOM_ACCOUNT_ID')
+    ZOOM_CLIENT_ID = config('ZOOM_CLIENT_ID')
     ZOOM_CLIENT_SECRET = config('ZOOM_CLIENT_SECRET')
 
     # Zoom token endpoint
-    token_url = f"https://zoom.us/oauth/token?grant_type=account_credentials&account_id={ZOOM_ACCOUNT_ID}"
+    token_url = 'https://zoom.us/oauth/token'
 
     response = requests.post(
         token_url,
-        auth=(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET)
+        params={
+            'grant_type': 'account_credentials',
+            'account_id': ZOOM_ACCOUNT_ID,
+        },
+        auth=(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET),
+        timeout=15,
     )
-
-    if response.status_code == 200:
-        return response.json().get('access_token')
-
-    # token request failed
-    print(f"Zoom token error: {response.status_code} {response.text}")
-    return None
+    response.raise_for_status()
+    access_token = response.json().get('access_token')
+    if not access_token:
+        raise RuntimeError('Zoom did not return an access token.')
+    return access_token
 
 
 def zoom_link(meeting):
@@ -161,10 +164,6 @@ def zoom_link(meeting):
         # -----------------------------------------------
         access_token = get_zoom_access_token()
 
-        if not access_token:
-            print("Zoom access token could not be retrieved.")
-            return None
-
         # -----------------------------------------------
         # Step 2 - Format meeting data for Zoom API
         # Zoom expects start_time in ISO 8601 format
@@ -182,7 +181,7 @@ def zoom_link(meeting):
             # type 2 = scheduled meeting
             # type 1 = instant meeting
             # type 3 = recurring with no fixed time
-            'start_time': meeting.start_datetime.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'start_time': meeting.start_datetime.isoformat(),
             'duration': duration_minutes,
             'timezone': meeting_timezone,
             'agenda': meeting.description or '',
@@ -206,9 +205,10 @@ def zoom_link(meeting):
         }
 
         response = requests.post(
-            'https://api.zoom.us/v2/users/me/meetings',
+            f"https://api.zoom.us/v2/users/{config('ZOOM_HOST_EMAIL')}/meetings",
             json=meeting_data,
-            headers=headers
+            headers=headers,
+            timeout=15,
         )
 
         # -----------------------------------------------
@@ -226,9 +226,9 @@ def zoom_link(meeting):
                 meeting.save(update_fields=['meeting_link'])
                 return join_url
 
-        print(f"Zoom meeting creation failed: {response.status_code} {response.text}")
-        return None
+        response.raise_for_status()
+        raise RuntimeError('Zoom created the meeting without a join URL.')
 
-    except Exception as e:
-        print(f"Zoom generation failed: {e}")
-        return None
+    except Exception:
+        logger.exception('Zoom generation failed for meeting %s', meeting.meeting_id)
+        raise

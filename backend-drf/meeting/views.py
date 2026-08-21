@@ -2,13 +2,13 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated 
-from meeting.permissions import IsMeetingOrganizerOrReadOnly
+from meeting.permissions import IsMeetingOrganizerOrReadOnly   # custom permissions
 
 # models
 from meeting.models import Meeting, Participant
 
 # serializer
-from meeting.serializers import MeetingSerializer
+from meeting.serializers import MeetingSerializer,ParticipantSerializer
 
 
 class MeetingView(viewsets.ModelViewSet):
@@ -35,4 +35,29 @@ class MeetingView(viewsets.ModelViewSet):
         meeting.status = 'cancelled'
         meeting.save()
         return Response({"message": "Meeting cancelled."}, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=True, url_path='complete')
+    def complete_meeting(self, request, pk=None):
+        meeting = self.get_object()
+
+        if meeting.status == 'completed':
+            return Response(
+                {'error': 'Already completed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        meeting.status = 'completed'
+        meeting.save()
+        return Response({"message": "Meeting completed."}, status=status.HTTP_200_OK)
+
+class ParticipantView(viewsets.ModelViewSet):
+    
+    serializer_class = ParticipantSerializer
+    permission_classes = [IsAuthenticated , IsMeetingOrganizerOrReadOnly]
+
+    def get_queryset(request):
+        organized = Participant.objects.filter(meeting__organizer=request.user) 
+        return organized    
+
+
     

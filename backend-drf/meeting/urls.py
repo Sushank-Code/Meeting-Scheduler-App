@@ -7,10 +7,9 @@ router = DefaultRouter()
 # http://127.0.0.1:8000/api/v1/meeting/
 router.register('',views.MeetingView,basename='meeting')
 
-# http://127.0.0.1:8000/api/v1/meeting/participant/
-router.register('participant',views.ParticipantView,basename='participant')
-
-
 urlpatterns = [
+    path('<uuid:meeting_id>/participants/', views.MeetingParticipantListCreateView.as_view()),
+    path('<uuid:meeting_id>/participants/<int:participant_id>/', views.MeetingParticipantDetailView.as_view()),
+    path('<uuid:meeting_id>/rsvp/', views.MeetingRsvpView.as_view()),
     path('',include(router.urls))
 ]

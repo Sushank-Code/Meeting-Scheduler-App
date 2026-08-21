@@ -123,4 +123,16 @@ class ParticipantSerializer(serializers.ModelSerializer):
     class Meta : 
         model = Participant
         fields = ['id','email','rsvp_status','invited_at']
-        read_only_fields = ['id','rsvp_status','invited_at']
+        read_only_fields = ['id', 'email', 'rsvp_status', 'invited_at']
+
+class AddParticipantSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Participant
+        fields = ['email']
+
+class RsvpSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Participant
+        fields = ['rsvp_status']

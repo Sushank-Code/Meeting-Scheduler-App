@@ -1,14 +1,22 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated 
+from django.shortcuts import get_object_or_404
 from meeting.permissions import IsMeetingOrganizerOrReadOnly   # custom permissions
 
 # models
 from meeting.models import Meeting, Participant
+from accounts.models import Account
 
 # serializer
-from meeting.serializers import MeetingSerializer,ParticipantSerializer
+from meeting.serializers import (
+    AddParticipantSerializer,
+    MeetingSerializer,
+    ParticipantSerializer,
+    RsvpSerializer,
+)
 
 
 class MeetingView(viewsets.ModelViewSet):
@@ -50,14 +58,62 @@ class MeetingView(viewsets.ModelViewSet):
         meeting.save()
         return Response({"message": "Meeting completed."}, status=status.HTTP_200_OK)
 
-class ParticipantView(viewsets.ModelViewSet):
+class MeetingParticipantListCreateView(generics.ListCreateAPIView):
     
+    def get_meeting(self):
+        return get_object_or_404(Meeting, meeting_id=self.kwargs['meeting_id']) # id = url
+
+    def get_queryset(self):
+        meeting = self.get_meeting()
+        is_participant = Participant.objects.filter(
+            meeting=meeting,
+            user=self.request.user,
+        ).exists()
+        if meeting.organizer != self.request.user and not is_participant:
+            raise PermissionDenied('You do not have access to this meeting.')
+        return Participant.objects.filter(meeting=meeting)
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddParticipantSerializer
+        return ParticipantSerializer
+
+    def perform_create(self, serializer):
+        meeting = self.get_meeting()
+        if meeting.organizer != self.request.user:
+            raise PermissionDenied('Only the organizer can add participants.')
+
+        email = serializer.validated_data['email']
+        if email == meeting.organizer.email:
+            raise ValidationError({'email': 'You cannot invite the organizer.'})
+        if Participant.objects.filter(meeting=meeting, email=email).exists():
+            raise ValidationError({'email': 'This email is already invited.'})
+
+        serializer.save(
+            meeting=meeting,
+            user=Account.objects.filter(email=email).first(),
+            rsvp_status='pending',
+        )
+
+
+class MeetingParticipantDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = ParticipantSerializer
-    permission_classes = [IsAuthenticated , IsMeetingOrganizerOrReadOnly]
+    lookup_url_kwarg = 'participant_id'
 
-    def get_queryset(request):
-        organized = Participant.objects.filter(meeting__organizer=request.user) 
-        return organized    
+    def get_queryset(self):
+        meeting = get_object_or_404(Meeting, meeting_id=self.kwargs['meeting_id'])
+        if meeting.organizer != self.request.user:
+            raise PermissionDenied('Only the organizer can manage participants.')
+        return Participant.objects.filter(meeting=meeting)
 
 
+class MeetingRsvpView(generics.UpdateAPIView):
+    serializer_class = RsvpSerializer
     
+    def get_object(self):
+        meeting = get_object_or_404(Meeting, meeting_id=self.kwargs['meeting_id'])
+        return get_object_or_404(
+            Participant,
+            meeting=meeting,
+            user=self.request.user,
+        )

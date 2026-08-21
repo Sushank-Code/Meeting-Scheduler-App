@@ -41,7 +41,7 @@ class Meeting (models.Model):
     def __str__(self):
         return self.title
 
-class Participant(models.Model):
+class Participant(models.Model): 
 
     meeting = models.ForeignKey(Meeting,on_delete=models.CASCADE,related_name='participant')
 

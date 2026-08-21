@@ -1,1 +1,1 @@
-select * from accounts_account;
+SELECT datname FROM pg_database;

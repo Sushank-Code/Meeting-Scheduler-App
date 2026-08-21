@@ -8,4 +8,11 @@ class MeetingAdmin(admin.ModelAdmin):
     list_filter = ['location_type']
     readonly_fields = ['created_at','updated_at']
     
-admin.site.register(Participant) 
+@admin.register(Participant)
+class ParticipantAdmin(admin.ModelAdmin):
+    list_display = ['id','meeting','user','email','rsvp_status']
+    list_display_links =['meeting']
+    list_editable = ['rsvp_status']
+    list_filter = ['rsvp_status']
+    readonly_fields = ['invited_at']
+    

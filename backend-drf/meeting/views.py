@@ -56,3 +56,20 @@ class MeetingView(viewsets.ModelViewSet):
         meeting.status = 'cancelled'
         meeting.save()
         return Response({"message": "Meeting cancelled."}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='rsvp')
+    def rsvp(self, request, pk=None):
+        meeting = self.get_object()
+        rsvp_status = request.data.get('rsvp_status')
+
+        if rsvp_status not in ['accepted', 'declined', 'pending']:
+            return Response({"error": "Invalid RSVP status."}, status=400)
+        
+        try:
+            participant = Participant.objects.get(meeting=meeting, user=request.user)
+        except Participant.DoesNotExist:
+            return Response({"error": "You are not a participant."}, status=404)
+        
+        participant.rsvp_status = rsvp_status
+        participant.save()
+        return Response({"rsvp_status": participant.rsvp_status}, status=status.HTTP_200_OK)

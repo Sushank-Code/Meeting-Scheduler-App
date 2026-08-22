@@ -73,11 +73,13 @@ class MeetingParticipantListCreateView(generics.ListCreateAPIView):
             raise PermissionDenied('You do not have access to this meeting.')
         return Participant.objects.filter(meeting=meeting)
 
+    # serializer check 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return AddParticipantSerializer
         return ParticipantSerializer
 
+    # create/ add participant 
     def perform_create(self, serializer):
         meeting = self.get_meeting()
         if meeting.organizer != self.request.user:
@@ -95,7 +97,6 @@ class MeetingParticipantListCreateView(generics.ListCreateAPIView):
             rsvp_status='pending',
         )
 
-
 class MeetingParticipantDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = ParticipantSerializer
     lookup_url_kwarg = 'participant_id'
@@ -105,7 +106,6 @@ class MeetingParticipantDetailView(generics.RetrieveDestroyAPIView):
         if meeting.organizer != self.request.user:
             raise PermissionDenied('Only the organizer can manage participants.')
         return Participant.objects.filter(meeting=meeting)
-
 
 class MeetingRsvpView(generics.UpdateAPIView):
     serializer_class = RsvpSerializer

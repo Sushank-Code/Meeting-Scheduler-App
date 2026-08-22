@@ -233,3 +233,16 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
 CELERY_TIMEZONE = 'Asia/Kathmandu'
 CELERY_RESULT_EXTENDED = True
+
+# Email
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
+
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool) 
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")

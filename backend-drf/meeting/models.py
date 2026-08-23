@@ -48,6 +48,7 @@ class Participant(models.Model):
     user = models.ForeignKey(Account,on_delete=models.SET_NULL,null=True,blank=True)
 
     email = models.EmailField(max_length=254)
+    rsvp_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     RSVP_STATUS = [
         ('pending', 'Pending'),
@@ -62,4 +63,4 @@ class Participant(models.Model):
         unique_together = [['meeting','email']]
 
     def __str__(self):
-        return f'{self.email} - {self.meeting.title}'    
+        return f'{self.email} - {self.meeting.title}'

@@ -4,7 +4,16 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated 
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.views import View
+from django.db import transaction
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from meeting.permissions import IsMeetingOrganizerOrReadOnly   # custom permissions
+from notifications.tasks import (
+    send_meeting_cancellation_task,
+    send_participant_invitation_task,
+)
 
 # models
 from meeting.models import Meeting, Participant
@@ -27,7 +36,9 @@ class MeetingView(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         organized = Meeting.objects.filter(organizer=user)   # get if organizer
-        participated = Meeting.objects.filter(participant__user=user)  # get if participant
+        participated = Meeting.objects.filter(
+            participant__email__iexact=user.email
+        )
         return (organized | participated).distinct()
 
     @action(methods=['post'], detail=True, url_path='cancel')
@@ -42,6 +53,9 @@ class MeetingView(viewsets.ModelViewSet):
 
         meeting.status = 'cancelled'
         meeting.save()
+        transaction.on_commit(
+            lambda: send_meeting_cancellation_task.delay(str(meeting.meeting_id))
+        )
         return Response({"message": "Meeting cancelled."}, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=True, url_path='complete')
@@ -67,7 +81,7 @@ class MeetingParticipantListCreateView(generics.ListCreateAPIView):
         meeting = self.get_meeting()
         is_participant = Participant.objects.filter(
             meeting=meeting,
-            user=self.request.user,
+            email__iexact=self.request.user.email,
         ).exists()
         if meeting.organizer != self.request.user and not is_participant:
             raise PermissionDenied('You do not have access to this meeting.')
@@ -97,6 +111,11 @@ class MeetingParticipantListCreateView(generics.ListCreateAPIView):
             rsvp_status='pending',
         )
 
+        participant_id = serializer.instance.id
+        transaction.on_commit(
+            lambda: send_participant_invitation_task.delay(participant_id)
+        )
+
 class MeetingParticipantDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = ParticipantSerializer
     lookup_url_kwarg = 'participant_id'
@@ -112,8 +131,42 @@ class MeetingRsvpView(generics.UpdateAPIView):
     
     def get_object(self):
         meeting = get_object_or_404(Meeting, meeting_id=self.kwargs['meeting_id'])
-        return get_object_or_404(
+        participant = get_object_or_404(
             Participant,
             meeting=meeting,
-            user=self.request.user,
+            email__iexact=self.request.user.email,
         )
+        if participant.user_id is None:
+            participant.user = self.request.user
+            participant.save(update_fields=['user'])
+        return participant
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PublicRsvpView(View):
+    """Lets an invited email recipient respond without an application account."""
+
+    valid_choices = {'accepted', 'declined'}
+
+    def get(self, request, token):
+        choice = request.GET.get('choice')
+        if choice not in self.valid_choices:
+            return HttpResponseBadRequest('Choose accepted or declined.')
+        participant = get_object_or_404(Participant, rsvp_token=token)
+        return HttpResponse(
+            '<h1>Confirm RSVP</h1>'
+            f'<p>{participant.meeting.title}</p>'
+            '<form method="post">'
+            f'<input type="hidden" name="choice" value="{choice}">'
+            f'<button type="submit">Confirm {choice.title()}</button>'
+            '</form>'
+        )
+
+    def post(self, request, token):
+        choice = request.POST.get('choice')
+        if choice not in self.valid_choices:
+            return HttpResponseBadRequest('Choose accepted or declined.')
+        participant = get_object_or_404(Participant, rsvp_token=token)
+        participant.rsvp_status = choice
+        participant.save(update_fields=['rsvp_status'])
+        return HttpResponse(f'<h1>RSVP {choice.title()}</h1><p>Thank you.</p>')

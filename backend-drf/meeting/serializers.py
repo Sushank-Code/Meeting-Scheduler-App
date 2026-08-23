@@ -3,6 +3,7 @@ from django.db import transaction
 from accounts.models import Account
 from meeting.models import Meeting, Participant
 from meeting.tasks import generate_meeting_link_task
+from notifications.tasks import send_participant_invitation_task
 
 class MeetingSerializer(serializers.ModelSerializer):
 
@@ -104,11 +105,17 @@ class MeetingSerializer(serializers.ModelSerializer):
 
                 for email in invited_emails:
                     user = Account.objects.filter(email=email).first()
-                    Participant.objects.get_or_create(
+                    participant, created = Participant.objects.get_or_create(
                         meeting=meeting,
                         email=email,
                         defaults={'user': user, 'rsvp_status': 'pending'},
                     )
+                    if created:
+                        transaction.on_commit(
+                            lambda participant_id=participant.id: send_participant_invitation_task.delay(
+                                participant_id
+                            )
+                        )
 
         return meeting
 

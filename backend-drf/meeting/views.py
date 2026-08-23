@@ -144,7 +144,7 @@ class MeetingRsvpView(generics.UpdateAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PublicRsvpView(View):
-    """Lets an invited email recipient respond without an application account."""
+    # "Lets an invited email recipient respond without an application account."
 
     valid_choices = {'accepted', 'declined'}
 

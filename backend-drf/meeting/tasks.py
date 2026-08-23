@@ -16,6 +16,8 @@ def generate_meeting_link_task(meeting_id):
     else:
         return None
 
+    # once google_meet_link() or zoom_link() succeeds, it queues the notification task.
+
     from notifications.tasks import send_meeting_created_notifications_task
     send_meeting_created_notifications_task.delay(str(meeting.meeting_id))
     return meeting_link

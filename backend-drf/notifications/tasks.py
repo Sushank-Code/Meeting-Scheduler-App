@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.template.defaultfilters import date as format_date
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from meeting.models import Meeting, Participant
@@ -21,14 +22,17 @@ def _meeting_details(meeting):
     }
 
 
-def _send(subject, message, recipient, html_message=None):
+def _send(subject, message, recipient, template_name=None, context=None):
     send_mail(
         subject,
         message,
         settings.DEFAULT_FROM_EMAIL,
         [recipient],
         fail_silently=False,
-        html_message=html_message,
+        html_message=(
+            render_to_string(template_name, context or {})
+            if template_name else None
+        ),
     )
 
 
@@ -51,14 +55,8 @@ def send_participant_invitation_task(participant_id):
             f"RSVP: accept at {accept_url} or decline at {decline_url}"
         ),
         participant.email,
-        html_message=(
-            f"<p><strong>{details['organizer_name']}</strong> invited you to "
-            f"<strong>{details['title']}</strong>.</p>"
-            f"<p><strong>When:</strong> {details['start']}<br>"
-            f"<a href=\"{details['meeting_link']}\">Join meeting</a></p>"
-            f"<p><a href=\"{accept_url}\">Accept</a> &nbsp; "
-            f"<a href=\"{decline_url}\">Decline</a></p>"
-        ),
+        'notifications/email/invitation.html',
+        {**details, 'accept_url': accept_url, 'decline_url': decline_url},
     )
 
 
@@ -75,6 +73,8 @@ def send_meeting_created_notifications_task(meeting_id):
             f"Meeting link: {details['meeting_link']}"
         ),
         meeting.organizer.email,
+        'notifications/email/confirmation.html',
+        details,
     )
 
     for participant_id in Participant.objects.filter(meeting=meeting).values_list('id', flat=True):
@@ -101,6 +101,8 @@ def send_meeting_cancellation_task(meeting_id):
                 f"has been cancelled by {details['organizer_name']}."
             ),
             participant.email,
+            'notifications/email/cancellation.html',
+            details,
         )
         try:
             EmailNotification.objects.create(
@@ -145,6 +147,8 @@ def send_upcoming_meeting_reminders_task():
                     f"Join meeting: {details['meeting_link']}"
                 ),
                 participant.email,
+                'notifications/email/reminder.html',
+                details,
             )
             try:
                 EmailNotification.objects.create(

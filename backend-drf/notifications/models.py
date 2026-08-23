@@ -2,7 +2,7 @@ from django.db import models
 
 
 class EmailNotification(models.Model):
-    """Records participant emails that must only be sent once per meeting."""
+    # "Records participant emails that must only be sent once per meeting."
 
     REMINDER = 'reminder'
     CANCELLATION = 'cancellation'

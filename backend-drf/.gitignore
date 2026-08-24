@@ -215,5 +215,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# google service account
-credentials/
+# celery beat
+data/celerybeat

@@ -1,3 +1,4 @@
 from django.contrib import admin
+from notifications.models import EmailNotification
 
-# Register your models here.
+admin.site.register(EmailNotification)

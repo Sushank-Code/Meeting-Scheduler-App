@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/../../../../Django Project/Meeting Scheduler App/backend-drf/meetscheduler-postgres/queries/Query_1.sql" value="f502d94f-e1fd-4b48-8a97-30f95d309392" />
     <file url="file://$PROJECT_DIR$/queries/Query.sql" value="f502d94f-e1fd-4b48-8a97-30f95d309392" />
   </component>
 </project>

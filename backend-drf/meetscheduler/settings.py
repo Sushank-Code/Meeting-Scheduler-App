@@ -165,6 +165,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    # Throttle
+    'DEFAULT_THROTTLE_RATES': {
+        'meeting_create' : '1/min'
+    }
 }
 
 SIMPLE_JWT = {

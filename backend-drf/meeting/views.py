@@ -2,18 +2,19 @@ from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views import View
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import IsAuthenticated 
 from meeting.permissions import IsMeetingOrganizerOrReadOnly   # custom permissions
 from notifications.tasks import (
     send_meeting_cancellation_task,
     send_participant_invitation_task,
 )
+from meeting.throttles import MeetingCreateThrottle
 
 # models
 from meeting.models import Meeting, Participant
@@ -27,10 +28,16 @@ from meeting.serializers import (
     RsvpSerializer,
 )
 
-
+# Meeting view
 class MeetingView(viewsets.ModelViewSet):
     serializer_class = MeetingSerializer
     permission_classes = [IsAuthenticated, IsMeetingOrganizerOrReadOnly]
+
+    def get_throttles(self):
+        if self.action == "create":
+            return [MeetingCreateThrottle()]
+
+        return []
 
     # get
     def get_queryset(self):
@@ -72,6 +79,7 @@ class MeetingView(viewsets.ModelViewSet):
         meeting.save()
         return Response({"message": "Meeting completed."}, status=status.HTTP_200_OK)
 
+# Participant view ( get / post )
 class MeetingParticipantListCreateView(generics.ListCreateAPIView):
     
     def get_meeting(self):
@@ -116,6 +124,7 @@ class MeetingParticipantListCreateView(generics.ListCreateAPIView):
             lambda: send_participant_invitation_task.delay(participant_id)
         )
 
+# Participant view ( retrieve / delete )
 class MeetingParticipantDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = ParticipantSerializer
     lookup_url_kwarg = 'participant_id'
@@ -126,6 +135,7 @@ class MeetingParticipantDetailView(generics.RetrieveDestroyAPIView):
             raise PermissionDenied('Only the organizer can manage participants.')
         return Participant.objects.filter(meeting=meeting)
 
+# Partticipant ( Update )
 class MeetingRsvpView(generics.UpdateAPIView):
     serializer_class = RsvpSerializer
     
@@ -144,7 +154,7 @@ class MeetingRsvpView(generics.UpdateAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PublicRsvpView(View):
-    # "Lets an invited email recipient respond without an application account."
+    #  Lets an invited email recipient respond without an application account.
 
     valid_choices = {'accepted', 'declined'}
 

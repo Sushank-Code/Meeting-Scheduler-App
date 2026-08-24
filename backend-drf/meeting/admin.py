@@ -11,7 +11,7 @@ class MeetingAdmin(admin.ModelAdmin):
     
 @admin.register(Participant)
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ['id','meeting','user','email','rsvp_status']
+    list_display = ['id','meeting','user','email','rsvp_status','rsvp_token']
     list_display_links =['meeting']
     list_editable = ['rsvp_status']
     list_filter = ['rsvp_status']

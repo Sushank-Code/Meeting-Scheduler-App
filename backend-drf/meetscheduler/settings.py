@@ -234,18 +234,6 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
 CELERY_TIMEZONE = 'Asia/Kathmandu'
 CELERY_RESULT_EXTENDED = True
 
-# celery beat
-
-CELERY_BEAT_SCHEDULE = {
-    'send-meeting-reminders-every-five-minutes': {
-        'task': 'notifications.tasks.send_upcoming_meeting_reminders_task',
-        'schedule': 300.0,
-    },
-}
-CELERY_BEAT_SCHEDULE_FILENAME = str(
-    BASE_DIR / 'data' / 'celerybeat' / 'celerybeat-schedule'
-)
- 
 # Email
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -257,5 +245,6 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool) 
-# DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
 SITE_URL = config("SITE_URL", default="http://127.0.0.1:8000")

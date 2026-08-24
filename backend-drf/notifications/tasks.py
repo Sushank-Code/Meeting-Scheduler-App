@@ -1,5 +1,5 @@
 from celery import shared_task
-from datetime import timedelta
+from smtplib import SMTPDataError
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import IntegrityError
@@ -36,7 +36,13 @@ def _send(subject, message, recipient, template_name=None, context=None):
     )
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(SMTPDataError,),
+    retry_backoff=True,
+    retry_jitter=True,
+    max_retries=5,
+    rate_limit='30/m',
+)
 def send_participant_invitation_task(participant_id):
     participant = Participant.objects.select_related('meeting__organizer').get(id=participant_id)
     meeting = participant.meeting
@@ -60,7 +66,13 @@ def send_participant_invitation_task(participant_id):
     )
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(SMTPDataError,),
+    retry_backoff=True,
+    retry_jitter=True,
+    max_retries=5,
+    rate_limit='30/m',
+)
 def send_meeting_created_notifications_task(meeting_id):
     meeting = Meeting.objects.select_related('organizer').get(meeting_id=meeting_id)
     details = _meeting_details(meeting)
@@ -83,80 +95,47 @@ def send_meeting_created_notifications_task(meeting_id):
 
 @shared_task
 def send_meeting_cancellation_task(meeting_id):
-    meeting = Meeting.objects.select_related('organizer').get(meeting_id=meeting_id)
-    details = _meeting_details(meeting)
+    participant_ids = Participant.objects.filter(
+        meeting_id=meeting_id
+    ).values_list('id', flat=True)
+    for participant_id in participant_ids:
+        send_participant_cancellation_task.delay(participant_id)
 
-    for participant in Participant.objects.filter(meeting=meeting):
-        if EmailNotification.objects.filter(
+
+@shared_task(
+    autoretry_for=(SMTPDataError,),
+    retry_backoff=True,
+    retry_jitter=True,
+    max_retries=5,
+    rate_limit='30/m',
+)
+def send_participant_cancellation_task(participant_id):
+    participant = Participant.objects.select_related('meeting__organizer').get(id=participant_id)
+    meeting = participant.meeting
+    if EmailNotification.objects.filter(
+        meeting=meeting,
+        participant=participant,
+        notification_type=EmailNotification.CANCELLATION,
+    ).exists():
+        return False
+
+    _send(
+        f"Cancelled: {meeting.title}",
+        (
+            f"The meeting '{meeting.title}' scheduled for "
+            f"{_meeting_details(meeting)['start']} has been cancelled by "
+            f"{_meeting_details(meeting)['organizer_name']}."
+        ),
+        participant.email,
+        'notifications/email/cancellation.html',
+        _meeting_details(meeting),
+    )
+    try:
+        EmailNotification.objects.create(
             meeting=meeting,
             participant=participant,
             notification_type=EmailNotification.CANCELLATION,
-        ).exists():
-            continue
-
-        _send(
-            f"Cancelled: {details['title']}",
-            (
-                f"The meeting '{details['title']}' scheduled for {details['start']} "
-                f"has been cancelled by {details['organizer_name']}."
-            ),
-            participant.email,
-            'notifications/email/cancellation.html',
-            details,
         )
-        try:
-            EmailNotification.objects.create(
-                meeting=meeting,
-                participant=participant,
-                notification_type=EmailNotification.CANCELLATION,
-            )
-        except IntegrityError:
-            pass
-
-
-@shared_task
-def send_upcoming_meeting_reminders_task():
-    now = timezone.now()
-    window_start = now + timedelta(minutes=25)
-    window_end = now + timedelta(minutes=35)
-    meetings = Meeting.objects.filter(
-        status='scheduled',
-        start_datetime__gte=window_start,
-        start_datetime__lte=window_end,
-    ).select_related('organizer')
-
-    sent_count = 0
-    for meeting in meetings:
-        details = _meeting_details(meeting)
-        participants = Participant.objects.filter(
-            meeting=meeting,
-            rsvp_status__in=['accepted', 'pending'],
-        )
-        for participant in participants:
-            if EmailNotification.objects.filter(
-                meeting=meeting,
-                participant=participant,
-                notification_type=EmailNotification.REMINDER,
-            ).exists():
-                continue
-
-            _send(
-                f"Reminder: {details['title']} starts in about 30 minutes",
-                (
-                    f"Reminder: '{details['title']}' starts at {details['start']}.\n\n"
-                    f"Join meeting: {details['meeting_link']}"
-                ),
-                participant.email,
-                'notifications/email/reminder.html',
-                details,
-            )
-            try:
-                EmailNotification.objects.create(
-                    meeting=meeting,
-                    participant=participant,
-                    notification_type=EmailNotification.REMINDER,
-                )
-            except IntegrityError:
-                pass
-            sent_count += 1
-    return sent_count
+    except IntegrityError:
+        pass
+    return True

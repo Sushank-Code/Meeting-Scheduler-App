@@ -6,7 +6,7 @@ class AccountModel(TestCase):
         username = 'Test_User'
         email = 'testuser@gmail.com'
         first_name = 'Test_first'
-        last_name = 'Test_Last'
+        last_name = 'Test_last'
 
         acc = Account.objects.create_user(username = username , email = email , first_name = first_name ,last_name = last_name)
 
@@ -38,4 +38,9 @@ class AccountModel(TestCase):
         self.assertTrue(superacc.is_staff)
         self.assertTrue(superacc.is_superuser)
         self.assertTrue(superacc.check_password(password))
-        
+
+class AccountMethodTest(TestCase):
+
+    def test_get_full_name(self):
+        acc = Account(first_name = 'Test', last_name = 'User')
+        self.assertEqual(acc.get_full_name(),'Test User') 

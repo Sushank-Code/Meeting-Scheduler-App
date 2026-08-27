@@ -1,7 +1,7 @@
 from django.test import TestCase
 from accounts.models import Account
 
-class AccountModel(TestCase):
+class AccountModelTest(TestCase):
     def test_create_user(self):
         username = 'Test_User'
         email = 'testuser@gmail.com'

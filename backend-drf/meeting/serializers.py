@@ -18,7 +18,7 @@ class MeetingSerializer(serializers.ModelSerializer):
         fields = ['meeting_id', 'title', 'description', 'start_datetime', 'end_datetime','duration','location_type','meeting_link', 'status', 'agenda', 'meeting_notes', 'created_at', 'updated_at', 'invited_emails','user_role']
 
         read_only_fields = ['meeting_id','duration','meeting_link','status','created_at','updated_at','user_role']
-        
+         
         extra_kwargs = {
             'location_type': {'required': False},
         }
@@ -44,7 +44,7 @@ class MeetingSerializer(serializers.ModelSerializer):
         )
 
         if startDateTime and endDateTime and endDateTime <= startDateTime:
-            raise serializers.ValidationError('End Time must be after start time ')
+            raise serializers.ValidationError('End Time must be after start time')
 
         return data
     

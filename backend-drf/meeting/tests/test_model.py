@@ -3,7 +3,7 @@ from meeting.models import Meeting,Participant
 from accounts.models import Account
 from datetime import datetime, timezone ,timedelta
 
-class MeetingModel(TestCase):
+class MeetingModelTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -15,7 +15,7 @@ class MeetingModel(TestCase):
         )
 
         cls.meet = Meeting.objects.create(
-            organizer = cls.user,
+            organizer = cls.user, 
             title = 'Test_Title',
             description = 'Test_Description',
             start_datetime = datetime(2026, 8, 27, 11, 0, tzinfo=timezone.utc),
@@ -46,7 +46,7 @@ class MeetingModel(TestCase):
             (
                 p.meeting,
                 p.user,
-                p.email,
+                p.email, 
                 p.rsvp_token,
                 p.rsvp_status,
             ),

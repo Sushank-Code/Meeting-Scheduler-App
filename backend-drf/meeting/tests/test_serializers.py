@@ -1,4 +1,4 @@
-from rest_framework.test import APITestCase ,APIRequestFactory
+from rest_framework.test import APITestCase, APIRequestFactory
 from datetime import datetime, timezone
 
 from meeting.models import Meeting, Participant
@@ -28,10 +28,8 @@ class MeetingSerializerTest(APITestCase):
             status='scheduled',
         )
 
-    def test_create_meeting_valid_data(self):
-   
-        data = {
-            "title": "Project Kickoff2",
+        cls.data = {
+            "title": "Project Kickoff",
             "description": "Discuss Q3 goals",
             "start_datetime": "2026-08-27T11:00:00Z",
             "end_datetime": "2026-08-27T12:00:00Z",
@@ -42,12 +40,20 @@ class MeetingSerializerTest(APITestCase):
                 "harr@gmail.com"
             ]
         }
-        serializer = MeetingSerializer(data = data)
+
+    def setUp(self):
+        factory = APIRequestFactory()
+        self.request = factory.post("/meetings/")
+        self.request.user = self.user
+
+    def test_meeting_valid_data(self):
+
+        serializer = MeetingSerializer(data=self.data)
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.errors,{})
+        self.assertEqual(serializer.errors, {})
 
     def test_create_meeting_valid_date(self):
-        
+
         data = {
             "title": "Project Kickoff2",
             "description": "Discuss Q3 goals",
@@ -62,40 +68,70 @@ class MeetingSerializerTest(APITestCase):
         }
 
         serializer = MeetingSerializer(data=data)
-    
+
         self.assertFalse(serializer.is_valid())
-        self.assertEqual(serializer.errors['non_field_errors'][0],'End Time must be after start time')
+        self.assertEqual(
+            serializer.errors['non_field_errors'][0], 'End Time must be after start time')
 
     def test_create_meeting_valid_invitedemail(self):
-       
-        data = {
-            "title": "Project Kickoff2",
-            "description": "Discuss Q3 goals",
-            "start_datetime": "2026-08-27T11:00:00Z",
-            "end_datetime": "2026-08-27T12:00:00Z",
-            "location_type": "google_meet",
-            "agenda": "Review roadmap3",
-            "invited_emails": [
-                "harry@gmail.com",
-                "harr@gmail.com",
-                self.user.email
-            ]
-        }
-        # --- user cannnot inivite ownself ---
 
-        factory = APIRequestFactory()
-        request = factory.post("/meetings/", data)
+        data = self.data.copy()
+        data["invited_emails"] = [
+            "harry@gmail.com",
+            self.user.email
+        ]
 
-        request.user = self.user
-
-        # ---
         serializer = MeetingSerializer(
             data=data,
-            context={"request": request}
+            context={"request": self.request}
         )
-    
+
         self.assertFalse(serializer.is_valid())
-        self.assertEqual(serializer.errors['invited_emails'][0],'You cannot invite yourself to your own meeting')
+        self.assertEqual(serializer.errors['invited_emails'][0],
+                         'You cannot invite yourself to your own meeting')
 
+    def test_create_meeting(self):
 
-    
+        serializer = MeetingSerializer(
+            data=self.data,
+            context={"request": self.request}
+        )
+
+        self.assertTrue(serializer.is_valid())
+
+        meeting = serializer.save()
+
+        # Meeting
+        self.assertEqual(meeting.organizer, self.user)
+        self.assertEqual(meeting.title, "Project Kickoff")
+        self.assertEqual(meeting.description, "Discuss Q3 goals")
+
+        # Participants
+        participants = Participant.objects.filter(
+            meeting=meeting
+        )
+
+        self.assertEqual(participants.count(), 2)
+
+        self.assertTrue(
+            participants.filter(
+                email="harry@gmail.com"
+            ).exists()
+        )
+
+        self.assertTrue(
+            participants.filter(
+                email="harr@gmail.com"
+            ).exists()
+        )
+
+    def test_user_role(self):
+        serializer = MeetingSerializer(
+            self.meet,
+            context={"request": self.request}
+        )
+
+        self.assertEqual(
+            serializer.get_user_role(self.meet),
+            "organizer"
+        )

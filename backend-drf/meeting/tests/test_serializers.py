@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase, APIRequestFactory
 from datetime import datetime, timezone
+from django.urls import reverse
 
 from meeting.models import Meeting, Participant
 from accounts.models import Account
@@ -43,7 +44,8 @@ class MeetingSerializerTest(APITestCase):
 
     def setUp(self):
         factory = APIRequestFactory()
-        self.request = factory.post("/meetings/")
+        url = reverse('meeting-list')
+        self.request = factory.post(url)
         self.request.user = self.user
 
     def test_meeting_valid_data(self):

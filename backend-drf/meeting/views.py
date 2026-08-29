@@ -9,6 +9,7 @@ from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated 
+
 from meeting.permissions import IsMeetingOrganizerOrReadOnly   # custom permissions
 from notifications.tasks import (
     send_meeting_cancellation_task,

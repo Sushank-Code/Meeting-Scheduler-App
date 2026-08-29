@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
 from datetime import datetime, timezone, timedelta
+import pdb
 
 from accounts.models import Account
 from meeting.models import Meeting, Participant
@@ -105,7 +106,7 @@ class MeetingViewTest(APITestCase):
             },
             format="json"
         )
-
+        # pdb.set_trace()  # trace the data for debug
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.meet.refresh_from_db()

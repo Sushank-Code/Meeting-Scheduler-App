@@ -1,4 +1,3 @@
-import React from 'react'
 import AuthContextProvider from './AuthContextProvider'
 
 const ContextCombiner = ({children}) => {

@@ -1,4 +1,3 @@
-import React from 'react'
 import { googleLogo, facebookLogo, heroImage } from '../../assets/helper'
 import { googleAuth } from '../../services/api'
 import { useAuth } from '../../context/AuthContextProvider'

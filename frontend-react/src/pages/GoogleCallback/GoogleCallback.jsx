@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useAuth } from '../../context/AuthContextProvider'
 import { useNavigate, useLocation } from 'react-router-dom'
 

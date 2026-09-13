@@ -1,5 +1,5 @@
 import { googleLogo, facebookLogo, heroImage } from '../../assets/helper'
-import { googleAuth } from '../../services/api'
+import { googleAuth } from '../../services/authApi'
 import { useAuth } from '../../context/AuthContextProvider'
 
 const Home = () => {

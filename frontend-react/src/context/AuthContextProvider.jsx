@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, createContext } from 'react'
-import { googleAuth, googleAuthorization, getUserProfile } from '../services/api'
+import { googleAuth, googleAuthorization, getUserProfile } from '../services/authApi'
 // import { useNavigate } from 'react-router-dom'
 
 // creating context 

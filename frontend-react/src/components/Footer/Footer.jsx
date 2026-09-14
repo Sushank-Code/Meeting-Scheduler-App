@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const Footer = () => {
@@ -82,19 +82,19 @@ const Footer = () => {
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-300 mb-4">Security &amp; Legal</h3>
             <ul className="space-y-2.5 text-blue-100">
-              <li><a className="hover:text-white transition" href="#">Privacy Policy</a></li>
-              <li><a className="hover:text-white transition" href="#">Terms of Service</a></li>
-              <li><a className="hover:text-white transition" href="#">Security Controls</a></li>
-              <li><a className="hover:text-white transition" href="#">GDPR Compliance</a></li>
+              <li><a className="hover:text-white transition" >Privacy Policy</a></li>
+              <li><a className="hover:text-white transition" >Terms of Service</a></li>
+              <li><a className="hover:text-white transition" >Security Controls</a></li>
+              <li><a className="hover:text-white transition" >GDPR Compliance</a></li>
             </ul>
           </div>
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-300 mb-4">Support</h3>
             <ul className="space-y-2.5 text-blue-100">
-              <li><a className="hover:text-white transition" href="#">Contact Support</a></li>
-              <li><a className="hover:text-white transition" href="#">Knowledge Base</a></li>
-              <li><a className="hover:text-white transition" href="#">System Status</a></li>
-              <li><a className="hover:text-white transition" href="#">Book a Demo</a></li>
+              <li><a className="hover:text-white transition" >Contact Support</a></li>
+              <li><a className="hover:text-white transition" >Knowledge Base</a></li>
+              <li><a className="hover:text-white transition" >System Status</a></li>
+              <li><a className="hover:text-white transition" >Book a Demo</a></li>
             </ul>
           </div>
         </div>

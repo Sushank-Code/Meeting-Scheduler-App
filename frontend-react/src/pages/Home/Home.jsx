@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { googleLogo, screenImg } from '../../assets/helper'
+import { googleLogo, screenImg, profileImg } from '../../assets/helper'
 import { useAuth } from '../../context/AuthContextProvider'
 import Footer from '../../components/Footer/Footer'
 
@@ -9,9 +9,9 @@ const testimonialsData = [
     quote: '"MeetSync transformed how we run roadmap reviews. Auto-provisioning Google Meet links and live RSVP tracking saves our team hours every week."',
     name: 'Sarah Jenkins',
     role: 'Principal PM at Acme Corp',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop',
+    image: profileImg,
     initials: 'SJ',
-    stars: 5,
+    stars: 4,
   },
   {
     quote: '"The public RSVP flow without login is pure genius. Our external clients accept meetings in 2 seconds without creating another account."',
@@ -27,7 +27,7 @@ const testimonialsData = [
     role: 'Design Director at Studio',
     initials: 'ER',
     bg: 'bg-emerald-600',
-    stars: 5,
+    stars: 3,
   },
 ]
 

@@ -11,6 +11,11 @@
     outline: 2px solid #2563EB;
     outline-offset: 2px;
   }
+  .bg-grid-pattern {
+    background-color: #F9FAFB;
+    background-image: radial-gradient(#E2E8F0 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
 }
 
 html {

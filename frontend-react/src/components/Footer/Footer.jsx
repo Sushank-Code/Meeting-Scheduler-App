@@ -107,9 +107,9 @@ const Footer = () => {
             <span>© 2025 MeetSync, Inc. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6">
-            <a className="hover:text-white transition" href="#">Privacy</a>
-            <a className="hover:text-white transition" href="#">Terms</a>
-            <a className="hover:text-white transition" href="#">Security</a>
+            <a className="hover:text-white transition" >Privacy</a>
+            <a className="hover:text-white transition" >Terms</a>
+            <a className="hover:text-white transition" >Security</a>
           </div>
         </div>
       </div>

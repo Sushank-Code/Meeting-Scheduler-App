@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContextProvider'
 
 const Navbar = () => {
   const { isLoggedIn, logout, user} = useAuth()
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
 

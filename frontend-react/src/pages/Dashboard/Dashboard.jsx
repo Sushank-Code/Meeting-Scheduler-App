@@ -138,17 +138,6 @@ const Dashboard = () => {
               </svg>
               <span>Refresh</span>
             </button>
-
-            <button
-              onClick={() => setIsCreateOpen(true)}
-              type="button"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold shadow-sm hover:bg-blue-700 transition active:scale-[0.98] cursor-pointer"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-              <span>+ Schedule Meeting</span>
-            </button>
           </div>
         </div>
 

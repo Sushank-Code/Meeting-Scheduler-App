@@ -422,13 +422,12 @@ const Home = () => {
                     Go to Dashboard
                   </Link>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={SignupWithGoogle}
+                  <Link
+                    to='/login'
                     className="h-11 px-6 inline-flex items-center justify-center bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-medium rounded-md shadow-sm transition custom-focus-ring cursor-pointer"
                   >
                     Get Started for Free
-                  </button>
+                  </Link>
                 )}
               </div>
             </div>

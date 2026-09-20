@@ -1,99 +1,14 @@
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import CreateMeeting from '../../components/Meeting/CreateMeeting'
 import { useAuth } from '../../context/AuthContextProvider'
+import { useMeeting } from '../../context/MeetingContextProvider'
 
-const initialOrganizedMeetings = [
-  {
-    id: 1,
-    title: 'Q4 Product Roadmap & Sprint Alignment',
-    description: 'Quarterly engineering review covering infrastructure migrations, customer requested UX revamps, and OKR capacity mapping.',
-    status: 'scheduled',
-    platform: 'Google Meet',
-    host: 'Host (You)',
-    time: 'Tomorrow, 2:00 PM – 3:00 PM',
-    duration: '1 hr',
-    participantsCount: 4,
-    avatars: [
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop',
-    ],
-  },
-  {
-    id: 2,
-    title: 'Enterprise Architecture & Security Review',
-    description: 'Annual SOC2 Type II compliance controls overview with cloud security architects and external legal audit stakeholders.',
-    status: 'scheduled',
-    platform: 'Zoom',
-    host: 'Host (You)',
-    time: 'Oct 28, 10:00 AM – 11:30 AM',
-    duration: '1.5 hrs',
-    participantsCount: 6,
-    avatars: [
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=100&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop',
-    ],
-  },
-  {
-    id: 3,
-    title: 'Client Onboarding: Acme Corp Strategy Sync',
-    description: 'Kick-off session to review custom integration timelines, SSO credentials, and project management handover deliverables.',
-    status: 'completed',
-    platform: 'Google Meet',
-    host: 'Archived',
-    time: 'Yesterday, 3:30 PM – 4:15 PM',
-    duration: '45 mins',
-    participantsCount: 3,
-    avatars: [
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=100&auto=format&fit=crop',
-    ],
-  },
-  {
-    id: 4,
-    title: 'Design System Governance Working Group',
-    description: 'Bi-weekly cadence session across product design and UI engineering to resolve proposed elevation and spacing token updates.',
-    status: 'cancelled',
-    platform: 'Google Meet',
-    host: 'Slot Released',
-    time: 'Oct 22, 11:00 AM – 12:00 PM',
-    duration: '1 hr',
-    participantsCount: 5,
-    avatars: [
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop',
-    ],
-  },
-]
-
-const initialParticipatingMeetings = [
-  {
-    id: 101,
-    title: 'Series B Fundraising Strategy & Lead Investor Debrief',
-    description: 'Pre-round metrics synthesis with finance committee and advisory board members.',
-    status: 'scheduled',
-    platform: 'Google Meet',
-    host: 'Alex Rivera',
-    time: 'Friday, 4:00 PM – 4:45 PM',
-    duration: '45 mins',
-    attendeesInfo: '3 external attendees',
-  },
-  {
-    id: 102,
-    title: 'Global Brand Guidelines Rollout',
-    description: 'Cross-departmental presentation of updated design tokens, visual templates, and typography packages.',
-    status: 'scheduled',
-    platform: 'Google Meet',
-    host: 'Elena Rostova',
-    time: 'Nov 2, 11:00 AM – 12:00 PM',
-    duration: '1 hr',
-    attendeesInfo: '12 external attendees',
-  },
-]
 
 const Meeting = () => {
+
+  const { meeting, error, loading } = useMeeting()
   const { user } = useAuth()
+
   const [activeTab, setActiveTab] = useState('organized') // 'organized' | 'participating'
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -101,23 +16,6 @@ const Meeting = () => {
   const [activeMenuId, setActiveMenuId] = useState(null)
   const [organizedMeetings, setOrganizedMeetings] = useState(initialOrganizedMeetings)
 
-  const handleMeetingCreated = (newMeeting) => {
-    const createdItem = {
-      id: Date.now(),
-      title: newMeeting.title,
-      description: newMeeting.description || 'No description provided.',
-      status: 'scheduled',
-      platform: newMeeting.platform === 'zoom' ? 'Zoom' : 'Google Meet',
-      host: 'Host (You)',
-      time: `${newMeeting.startDate}, ${newMeeting.startTime}`,
-      duration: '60 mins',
-      participantsCount: newMeeting.attendees.length,
-      avatars: [
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
-      ],
-    }
-    setOrganizedMeetings([createdItem, ...organizedMeetings])
-  }
 
   // Filtered organized meetings
   const filteredOrganized = organizedMeetings.filter((item) => {
@@ -153,7 +51,7 @@ const Meeting = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <button 
+            <button
               type="button"
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium rounded-xl shadow-xs transition cursor-pointer"
             >
@@ -183,11 +81,10 @@ const Meeting = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('organized')}
-                className={`relative pb-2 font-semibold text-sm transition flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'organized'
-                    ? 'text-blue-600 border-b-2 border-blue-600 -mb-0.5'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
+                className={`relative pb-2 font-semibold text-sm transition flex items-center gap-2 cursor-pointer ${activeTab === 'organized'
+                  ? 'text-blue-600 border-b-2 border-blue-600 -mb-0.5'
+                  : 'text-slate-500 hover:text-slate-800'
+                  }`}
               >
                 <span>Organized by me</span>
                 <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
@@ -198,11 +95,10 @@ const Meeting = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('participating')}
-                className={`relative pb-2 font-semibold text-sm transition flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'participating'
-                    ? 'text-blue-600 border-b-2 border-blue-600 -mb-0.5'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
+                className={`relative pb-2 font-semibold text-sm transition flex items-center gap-2 cursor-pointer ${activeTab === 'participating'
+                  ? 'text-blue-600 border-b-2 border-blue-600 -mb-0.5'
+                  : 'text-slate-500 hover:text-slate-800'
+                  }`}
               >
                 <span>Participating</span>
                 <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
@@ -295,9 +191,8 @@ const Meeting = () => {
                     </div>
 
                     {/* Title */}
-                    <h3 className={`text-lg font-bold text-slate-900 group-hover:text-blue-600 transition line-clamp-1 mb-2 ${
-                      meeting.status === 'cancelled' ? 'line-through text-slate-400' : ''
-                    }`}>
+                    <h3 className={`text-lg font-bold text-slate-900 group-hover:text-blue-600 transition line-clamp-1 mb-2 ${meeting.status === 'cancelled' ? 'line-through text-slate-400' : ''
+                      }`}>
                       {meeting.title}
                     </h3>
 
@@ -366,11 +261,11 @@ const Meeting = () => {
                         </button>
 
                         {activeMenuId === meeting.id && (
-                          <div 
+                          <div
                             className="absolute right-0 bottom-full mb-2 w-44 bg-white border border-slate-200 rounded-xl shadow-xl p-1 z-30 flex flex-col gap-0.5"
                             onMouseLeave={() => setActiveMenuId(null)}
                           >
-                            <button 
+                            <button
                               type="button"
                               onClick={() => setActiveMenuId(null)}
                               className="w-full text-left px-3 py-2 text-slate-700 hover:bg-slate-50 text-xs font-medium rounded-lg flex items-center gap-2 cursor-pointer"
@@ -380,7 +275,7 @@ const Meeting = () => {
                               </svg>
                               Edit Meeting
                             </button>
-                            <button 
+                            <button
                               type="button"
                               onClick={() => {
                                 setOrganizedMeetings(organizedMeetings.map(m => m.id === meeting.id ? { ...m, status: 'completed' } : m))
@@ -393,7 +288,7 @@ const Meeting = () => {
                               </svg>
                               Mark Complete
                             </button>
-                            <button 
+                            <button
                               type="button"
                               onClick={() => {
                                 setOrganizedMeetings(organizedMeetings.map(m => m.id === meeting.id ? { ...m, status: 'cancelled' } : m))

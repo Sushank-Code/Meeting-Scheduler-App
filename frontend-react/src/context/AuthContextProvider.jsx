@@ -4,7 +4,7 @@ import { googleAuth, googleAuthorization, getUserProfile } from '../services/aut
 // creating context 
 const AuthContext = createContext()
 
-const AuthContextProvider = ({ children }) => {
+const AuthContextProvider = ({ children }) => { 
     const [user, setUser] = useState(null)
     const [isLoggedIn, setisLoggedIn] = useState(!!localStorage.getItem('access_token'))
 

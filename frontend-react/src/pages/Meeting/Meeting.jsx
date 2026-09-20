@@ -43,9 +43,9 @@ const Meeting = () => {
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 cursor-pointer"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
             </svg>
             Create Meeting
@@ -96,7 +96,7 @@ const Meeting = () => {
                     {item.description && <p className="mb-4 text-sm text-slate-500">{item.description}</p>}
 
                     <div className="mb-4 flex items-center gap-2 rounded-xl bg-slate-50 px-3.5 py-3 text-xs font-medium text-slate-700"> Duration :
-                      <span>{formatDuration(item.duration)}</span> / 
+                      <span>{formatDuration(item.duration)}</span> /
                       <span>{platformName(item.location_type)}</span>
                     </div>
                   </div>

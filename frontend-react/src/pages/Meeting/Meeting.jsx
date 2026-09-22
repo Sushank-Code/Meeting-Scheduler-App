@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import CreateMeeting from '../../components/Meeting/CreateMeeting'
 import { useMeeting } from '../../context/MeetingContextProvider'
 
@@ -45,9 +46,7 @@ const Meeting = () => {
             onClick={() => setIsCreateModalOpen(true)}
             className="group inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 cursor-pointer"
           >
-            <svg className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-            </svg>
+            <Plus className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90" />
             Create Meeting
           </button>
         </header>

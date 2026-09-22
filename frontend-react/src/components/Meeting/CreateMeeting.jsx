@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Check, CircleCheck, Clock3, LoaderCircle, PencilLine, Video, X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContextProvider'
 
 const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
@@ -115,9 +116,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
               onClick={onClose}
               type="button"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
+              <X className="h-5 w-5" />
             </button>
           </div>
 
@@ -126,9 +125,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
             {/* SECTION 1: Basic Info */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2 text-blue-600 text-xs font-semibold uppercase tracking-wider">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                </svg>
+                <PencilLine className="h-4 w-4" />
                 <span>1. Meeting Information</span>
               </div>
 
@@ -171,9 +168,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
             <div className="flex flex-col gap-4 pt-4 border-t border-slate-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-blue-600 text-xs font-semibold uppercase tracking-wider">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                  </svg>
+                  <Clock3 className="h-4 w-4" />
                   <span>2. Date & Time Window</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-emerald-700 text-xs bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
@@ -250,9 +245,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
             <div className="flex flex-col gap-4 pt-4 border-t border-slate-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-blue-600 text-xs font-semibold uppercase tracking-wider">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                  </svg>
+                  <Video className="h-4 w-4" />
                   <span>3. Conferencing Platform <span className="text-red-500">*</span></span>
                 </div>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-amber-50 text-amber-800 border border-amber-200">
@@ -272,9 +265,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shadow-xs border border-slate-200">
-                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                        </svg>
+                        <Video className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-slate-900">Google Meet</h4>
@@ -299,9 +290,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shadow-xs border border-slate-200">
-                        <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                        </svg>
+                        <Video className="h-5 w-5 text-slate-700" />
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-slate-900">Zoom</h4>
@@ -340,9 +329,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                       onClick={() => handleRemoveAttendee(email)}
                       className="hover:bg-slate-200 rounded-full p-0.5 text-slate-400 hover:text-red-600 transition cursor-pointer"
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                      </svg>
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </span>
                 ))}
@@ -363,9 +350,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
               {/* Validation helper */}
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-emerald-700 text-xs font-medium">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                  </svg>
+                  <CircleCheck className="h-4 w-4" />
                   <span>{attendees.length} participants added • No duplicates</span>
                 </div>
                 <p className="text-xs text-slate-500">
@@ -395,10 +380,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                 >
                   {isSubmitting ? (
                     <>
-                      <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                      </svg>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
                       <span>Scheduling...</span>
                     </>
                   ) : (
@@ -417,9 +399,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
       {showToast && (
         <div className="fixed bottom-6 right-6 z-60 max-w-md bg-slate-900 text-white rounded-xl shadow-xl p-4 flex items-center gap-3 transition-all animate-in fade-in slide-in-from-bottom-5">
           <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-            </svg>
+            <Check className="h-4 w-4" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">Meeting Created!</span>

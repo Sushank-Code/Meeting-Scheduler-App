@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronDown, Menu, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContextProvider'
 
@@ -69,9 +70,7 @@ const Navbar = () => {
                 <span className="text-xs font-medium text-gray-700 max-w-30 truncate pr-1">
                   {user?.username}
                 </span>
-                <svg className="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDown className="mr-1 h-4 w-4 text-gray-400" />
               </button>
 
               {userDropdownOpen && (
@@ -132,13 +131,9 @@ const Navbar = () => {
             type="button"
           >
             {mobileMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
+              <X className="h-6 w-6" />
             ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
+              <Menu className="h-6 w-6" />
             )}
           </button>
         </div>

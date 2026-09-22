@@ -9,11 +9,11 @@ const MeetingContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // get
   const MeetingGet = async () => {
     try {
       const response = await getMeeting()
       setMeeting(response?.data)
-      console.log(response?.data)
       setLoading(false)
       setError(null)
     } catch (error) {
@@ -26,6 +26,8 @@ const MeetingContextProvider = ({ children }) => {
   useEffect(() => {
     MeetingGet()
   }, [])
+
+  // post
 
   const value = {
     meeting,

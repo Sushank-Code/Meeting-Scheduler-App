@@ -61,19 +61,13 @@ const Navbar = () => {
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className="flex items-center gap-2 p-1 rounded-full border border-gray-200 hover:border-blue-400 transition custom-focus-ring cursor-pointer"
               >
-                {user?.profile_picture ? (
-                  <img
-                    src={user.profile_picture}
-                    alt={user.email || 'User'}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-                    {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                )}
+                <img
+                  src={user?.profile_picture}
+                  alt={user?.email || 'User'}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
                 <span className="text-xs font-medium text-gray-700 max-w-30 truncate pr-1">
-                  {user?.first_name || user?.email?.split('@')[0] || 'Account'}
+                  {user?.username}
                 </span>
                 <svg className="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

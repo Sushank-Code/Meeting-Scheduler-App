@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, CircleCheck, Clock3, LoaderCircle, PencilLine, Video, X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContextProvider'
+import { useMeeting } from '../../context/MeetingContextProvider'
 
 const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
   const { user } = useAuth()
+      
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')

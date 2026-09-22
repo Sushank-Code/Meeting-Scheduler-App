@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, createContext } from 'react'
-import { getMeeting } from '../services/meetingApi'
+import { getMeeting, createMeeting } from '../services/meetingApi'
 
 const MeetingContext = createContext()
 
@@ -11,15 +11,20 @@ const MeetingContextProvider = ({ children }) => {
 
   // get
   const MeetingGet = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const response = await getMeeting()
       setMeeting(response?.data)
       setLoading(false)
       setError(null)
     } catch (error) {
-      setError("Error occured")
+      setError(error.response?.data?.message || 'Failed to fetch meetings');
       setLoading(false)
-      setMeeting(null)
+      setMeeting([])
+    }
+    finally {
+      setLoading(false)
     }
   }
 
@@ -28,12 +33,28 @@ const MeetingContextProvider = ({ children }) => {
   }, [])
 
   // post
+  const MeetingPost = async (meetingdata) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await createMeeting(meetingdata)  // axios automatically check status
+      setMeeting((prev) => [...prev, response?.data]);
+      return response?.data
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to create meeting');
+      throw error
+    }
+    finally {
+      setLoading(false)
+    }
+  }
 
   const value = {
     meeting,
     loading,
     error,
     MeetingGet,
+    MeetingPost
   }
   return (
     <MeetingContext.Provider value={value}>

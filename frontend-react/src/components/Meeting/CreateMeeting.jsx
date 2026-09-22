@@ -5,18 +5,20 @@ import { useMeeting } from '../../context/MeetingContextProvider'
 
 const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
   const { user } = useAuth()
-      
+  const { createMeeting, loading, error } = useMeeting()
 
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [startTime, setStartTime] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [endTime, setEndTime] = useState('')
-  const [platform, setPlatform] = useState('') // 'google-meet' | 'zoom'
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    platform: 'google_meet',
+  })
+
   const [attendees, setAttendees] = useState([])
   const [attendeeInput, setAttendeeInput] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showToast, setShowToast] = useState(false)
 
   // Close on Escape key
@@ -30,14 +32,44 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      resetForm()
+    }
+  }, [isOpen])
+
   if (!isOpen) return null
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+      platform: 'google_meet',
+    })
+    setAttendees([])
+    setAttendeeInput('')
+    setShowToast(false)
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
   const handleAddAttendee = (e) => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault()
       const email = attendeeInput.trim().replace(/,$/, '')
-      if (email && !attendees.includes(email)) {
-        setAttendees([...attendees, email])
+      if (email && !attendees.includes(email) && isValidEmail(email)) {
+        setAttendees((prev) => [...prev, email])
         setAttendeeInput('')
       }
     }
@@ -45,42 +77,55 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
 
   const handleBlurAttendee = () => {
     const email = attendeeInput.trim().replace(/,$/, '')
-    if (email && !attendees.includes(email)) {
-      setAttendees([...attendees, email])
+    if (email && !attendees.includes(email) && isValidEmail(email)) {
+      setAttendees((prev) => [...prev, email])
       setAttendeeInput('')
     }
   }
 
   const handleRemoveAttendee = (emailToRemove) => {
-    setAttendees(attendees.filter((email) => email !== emailToRemove))
+    setAttendees((prev) => prev.filter((email) => email !== emailToRemove))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
 
-    const newMeetingData = {
-      title,
-      description,
-      startDate,
-      startTime,
-      endDate,
-      endTime,
-      platform,
-      attendees,
-      host: user?.email || 'sarah.j@company.com',
-      status: 'scheduled'
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (attendees.length === 0) {
+      alert('Please add at least one attendee')
+      return
     }
 
-    setTimeout(() => {
-      setIsSubmitting(false)
+    // Combine date and time into ISO datetime strings
+    const start_datetime = `${formData.startDate}T${formData.startTime}:00Z`
+    const end_datetime = `${formData.endDate}T${formData.endTime}:00Z`
+
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      start_datetime,
+      end_datetime,
+      location_type: formData.platform,
+      agenda: formData.description,
+      invited_emails: attendees,
+    }
+
+    try {
+      await createMeeting(payload)
       setShowToast(true)
-      onMeetingCreated?.(newMeetingData)
+      onMeetingCreated?.()
+
       setTimeout(() => {
         setShowToast(false)
         onClose?.()
-      }, 1000)
-    }, 600)
+        resetForm()
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to create meeting:', err)
+    }
   }
 
   return (
@@ -124,6 +169,13 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
 
           {/* Modal Body Form */}
           <form className="flex flex-col gap-6 px-6 py-6 max-h-[72vh] overflow-y-auto" onSubmit={handleSubmit}>
+            {/* Display API Error */}
+            {error && (
+              <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
             {/* SECTION 1: Basic Info */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2 text-blue-600 text-xs font-semibold uppercase tracking-wider">
@@ -141,11 +193,12 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   <input
                     className="w-full h-11 px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition"
                     id="meeting-title"
+                    name="title"
                     placeholder="e.g., Q4 Product Roadmap & Sprint Alignment"
                     required
                     type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={formData.title}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
@@ -158,10 +211,11 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                 <textarea
                   className="w-full p-3.5 bg-white border border-slate-300 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 resize-none transition"
                   id="meeting-desc"
+                  name="description"
                   placeholder="Add agenda overview, objectives, or context notes..."
                   rows="3"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={formData.description}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -172,9 +226,6 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                 <div className="flex items-center gap-2 text-blue-600 text-xs font-semibold uppercase tracking-wider">
                   <Clock3 className="h-4 w-4" />
                   <span>2. Date & Time Window</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-emerald-700 text-xs bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  <span>✓ Validated</span>
                 </div>
               </div>
 
@@ -187,16 +238,18 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="date"
+                      name="startDate"
                       className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      value={formData.startDate}
+                      onChange={handleChange}
                       required
                     />
                     <input
                       type="time"
+                      name="startTime"
                       className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
+                      value={formData.startTime}
+                      onChange={handleChange}
                       required
                     />
                   </div>
@@ -210,36 +263,22 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="date"
+                      name="endDate"
                       className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                      value={formData.endDate}
+                      onChange={handleChange}
                       required
                     />
                     <input
                       type="time"
+                      name="endTime"
                       className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
+                      value={formData.endTime}
+                      onChange={handleChange}
                       required
                     />
                   </div>
                 </div>
-              </div>
-
-              {/* Duration badge & metadata pill bar */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-slate-600 text-xs">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
-                    ⏱ Duration: 60 mins
-                  </span>
-                  <span className="text-slate-300">•</span>
-                  <span className="flex items-center gap-1 text-slate-500">
-                    🌐 Timezone: Local System Time
-                  </span>
-                </div>
-                <span className="text-emerald-700 font-medium flex items-center gap-1">
-                  ⚡ Slots Available
-                </span>
               </div>
             </div>
 
@@ -250,20 +289,24 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   <Video className="h-4 w-4" />
                   <span>3. Conferencing Platform <span className="text-red-500">*</span></span>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-amber-50 text-amber-800 border border-amber-200">
-                  🔒 Locked once created
-                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup">
                 {/* Google Meet Radio Card */}
                 <label
-                  onClick={() => setPlatform('google-meet')}
-                  className={`relative flex flex-col p-4 rounded-xl cursor-pointer transition border-2 ${platform === 'google-meet'
+                  className={`relative flex flex-col p-4 rounded-xl cursor-pointer transition border-2 ${formData.platform === 'google_meet'
                     ? 'bg-blue-50/50 border-blue-600 shadow-xs'
                     : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
                     }`}
                 >
+                  <input
+                    type="radio"
+                    name="platform"
+                    value="google_meet"
+                    checked={formData.platform === 'google_meet'}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shadow-xs border border-slate-200">
@@ -274,21 +317,28 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                         <span className="text-xs text-blue-600 font-medium">Auto conference link</span>
                       </div>
                     </div>
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${platform === 'google-meet' ? 'border-blue-600 bg-white' : 'border-slate-300'
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.platform === 'google_meet' ? 'border-blue-600 bg-white' : 'border-slate-300'
                       }`}>
-                      {platform === 'google-meet' && <span className="w-2 h-2 rounded-full bg-blue-600"></span>}
+                      {formData.platform === 'google_meet' && <span className="w-2 h-2 rounded-full bg-blue-600"></span>}
                     </div>
                   </div>
                 </label>
 
                 {/* Zoom Radio Card */}
                 <label
-                  onClick={() => setPlatform('zoom')}
-                  className={`relative flex flex-col p-4 rounded-xl cursor-pointer transition border-2 ${platform === 'zoom'
+                  className={`relative flex flex-col p-4 rounded-xl cursor-pointer transition border-2 ${formData.platform === 'zoom'
                     ? 'bg-blue-50/50 border-blue-600 shadow-xs'
                     : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
                     }`}
                 >
+                  <input
+                    type="radio"
+                    name="platform"
+                    value="zoom"
+                    checked={formData.platform === 'zoom'}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shadow-xs border border-slate-200">
@@ -299,9 +349,9 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                         <span className="text-xs text-slate-500">Cloud Meeting</span>
                       </div>
                     </div>
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${platform === 'zoom' ? 'border-blue-600 bg-white' : 'border-slate-300'
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.platform === 'zoom' ? 'border-blue-600 bg-white' : 'border-slate-300'
                       }`}>
-                      {platform === 'zoom' && <span className="w-2 h-2 rounded-full bg-blue-600"></span>}
+                      {formData.platform === 'zoom' && <span className="w-2 h-2 rounded-full bg-blue-600"></span>}
                     </div>
                   </div>
                 </label>
@@ -356,7 +406,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   <span>{attendees.length} participants added • No duplicates</span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  Organizer ({user?.email || 'sarah.j@company.com'}) is automatically included as host.
+                  Organizer ({user?.email || 'user@company.com'}) is automatically included as host.
                 </p>
               </div>
             </div>
@@ -376,19 +426,17 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                   Cancel
                 </button>
                 <button
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-sm flex items-center gap-2 transition cursor-pointer"
-                  disabled={isSubmitting}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-sm flex items-center gap-2 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading}
                   type="submit"
                 >
-                  {isSubmitting ? (
+                  {loading ? (
                     <>
                       <LoaderCircle className="h-4 w-4 animate-spin" />
                       <span>Scheduling...</span>
                     </>
                   ) : (
-                    <>
-                      <span>Create Meeting</span>
-                    </>
+                    <span>Create Meeting</span>
                   )}
                 </button>
               </div>

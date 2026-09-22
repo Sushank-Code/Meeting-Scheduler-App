@@ -5,7 +5,7 @@ import { useMeeting } from '../../context/MeetingContextProvider'
 
 const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
   const { user } = useAuth()
-  const { createMeeting, loading, error } = useMeeting()
+  const { MeetingPost, loading, error } = useMeeting()
 
   const [formData, setFormData] = useState({
     title: '',
@@ -114,7 +114,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
     }
 
     try {
-      await createMeeting(payload)
+      await MeetingPost(payload)
       setShowToast(true)
       onMeetingCreated?.()
 
@@ -168,7 +168,8 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
           </div>
 
           {/* Modal Body Form */}
-          <form className="flex flex-col gap-6 px-6 py-6 max-h-[72vh] overflow-y-auto" onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-6 px-6 py-6 max-h-[72vh] overflow-y-auto"
+            onSubmit={handleSubmit}>
             {/* Display API Error */}
             {error && (
               <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">

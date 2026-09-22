@@ -19,7 +19,8 @@ const MeetingContextProvider = ({ children }) => {
       setLoading(false)
       setError(null)
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to fetch meetings');
+      const data = error.response?.data
+      setError(data?.non_field_errors?.[0] || data?.detail || 'Failed to fetch meetings')
       setLoading(false)
       setMeeting([])
     }
@@ -37,11 +38,13 @@ const MeetingContextProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await createMeeting(meetingdata)  // axios automatically check status
+      const response = await createMeeting(meetingdata)
       setMeeting((prev) => [...prev, response?.data]);
       return response?.data
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create meeting');
+      const data = error.response?.data
+      // console.log(data)
+      setError(data?.non_field_errors?.[0] || data?.detail || 'Failed to create meeting')
       throw error
     }
     finally {

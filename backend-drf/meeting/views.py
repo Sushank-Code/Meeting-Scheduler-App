@@ -34,11 +34,11 @@ class MeetingView(viewsets.ModelViewSet):
     serializer_class = MeetingSerializer
     permission_classes = [IsAuthenticated, IsMeetingOrganizerOrReadOnly]
 
-    def get_throttles(self):
-        if self.action == "create":
-            return [MeetingCreateThrottle()]
+    # def get_throttles(self):
+    #     if self.action == "create":
+    #         return [MeetingCreateThrottle()]
 
-        return []
+    #     return []
 
     # get
     def get_queryset(self):

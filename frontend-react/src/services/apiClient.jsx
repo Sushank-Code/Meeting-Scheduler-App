@@ -32,11 +32,17 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             try {
                 const refresh_token = localStorage.getItem('refresh_token');
+                if (!refresh_token) {
+                    localStorage.clear()
+                    sessionStorage.clear()
+                    window.location.href = '/'
+                    return Promise.reject(error)
+                }
                 const response = await api.post('auth/jwt/refresh/', { refresh: refresh_token });
                 localStorage.setItem('access_token', response.data.access);
                 originalRequest.headers.Authorization = `JWT ${response.data.access}`;
                 return api(originalRequest);
-            } catch (error) {
+            } catch {
                 localStorage.clear()
                 sessionStorage.clear()
                 window.location.href = '/'

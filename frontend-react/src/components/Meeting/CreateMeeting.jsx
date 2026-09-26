@@ -94,42 +94,42 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault()
+  const meetSubmit = async (e) => {
+    e.preventDefault()
 
-  //   if (attendees.length === 0) {
-  //     alert('Please add at least one attendee')
-  //     return
-  //   }
+    if (attendees.length === 0) {
+      alert('Please add at least one attendee')
+      return
+    }
 
-  //   // Combine date and time into ISO datetime strings
-  //   const start_datetime = `${formData.startDate}T${formData.startTime}:00Z`
-  //   const end_datetime = `${formData.endDate}T${formData.endTime}:00Z`
+    // Combine date and time into ISO datetime strings
+    const start_datetime = `${formData.startDate}T${formData.startTime}:00Z`
+    const end_datetime = `${formData.endDate}T${formData.endTime}:00Z`
 
-  //   const payload = {
-  //     title: formData.title,
-  //     description: formData.description,
-  //     start_datetime,
-  //     end_datetime,
-  //     location_type: formData.platform,
-  //     agenda: formData.description,
-  //     invited_emails: attendees,
-  //   }
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      start_datetime,
+      end_datetime,
+      location_type: formData.platform,
+      agenda: formData.description,
+      invited_emails: attendees,
+    }
 
-  //   try {
-  //     await MeetingPost(payload)
-  //     setShowToast(true)
-  //     onMeetingCreated?.()
+    try {
+      await MeetingPost(payload)
+      setShowToast(true)
+      onMeetingCreated?.()
 
-  //     setTimeout(() => {
-  //       setShowToast(false)
-  //       onClose?.()
-  //       resetForm()
-  //     }, 2000)
-  //   } catch (err) {
-  //     console.error('Failed to create meeting:', err)
-  //   }
-  // }
+      setTimeout(() => {
+        setShowToast(false)
+        onClose?.()
+        resetForm()
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to create meeting:', err)
+    }
+  }
 
   return (
     <>
@@ -172,7 +172,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
 
           {/* Modal Body Form */}
           <form className="flex flex-col gap-6 px-6 py-6 max-h-[72vh] overflow-y-auto"
-            onSubmit={handleSubmit}>
+            onSubmit={handleSubmit(meetSubmit)}>
             {/* Display API Error */}
             {error && (
               <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
@@ -201,8 +201,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                     placeholder="e.g., Q4 Product Roadmap & Sprint Alignment"
                     required
                     type="text"
-                    value={formData.title}
-                    onChange={handleChange}
+                    {...register('title')}
                   />
                 </div>
               </div>

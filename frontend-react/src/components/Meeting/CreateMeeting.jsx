@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Check, CircleCheck, Clock3, LoaderCircle, PencilLine, Video, X } from 'lucide-react'
+import { useForm } from 'react-hook-form'
 import { useAuth } from '../../context/AuthContextProvider'
 import { useMeeting } from '../../context/MeetingContextProvider'
 
 const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
   const { user } = useAuth()
   const { MeetingPost, loading, error } = useMeeting()
+
+  const { register, handleSubmit, formState: { errors } } = useForm({})
 
   const [formData, setFormData] = useState({
     title: '',
@@ -91,42 +94,42 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault()
 
-    if (attendees.length === 0) {
-      alert('Please add at least one attendee')
-      return
-    }
+  //   if (attendees.length === 0) {
+  //     alert('Please add at least one attendee')
+  //     return
+  //   }
 
-    // Combine date and time into ISO datetime strings
-    const start_datetime = `${formData.startDate}T${formData.startTime}:00Z`
-    const end_datetime = `${formData.endDate}T${formData.endTime}:00Z`
+  //   // Combine date and time into ISO datetime strings
+  //   const start_datetime = `${formData.startDate}T${formData.startTime}:00Z`
+  //   const end_datetime = `${formData.endDate}T${formData.endTime}:00Z`
 
-    const payload = {
-      title: formData.title,
-      description: formData.description,
-      start_datetime,
-      end_datetime,
-      location_type: formData.platform,
-      agenda: formData.description,
-      invited_emails: attendees,
-    }
+  //   const payload = {
+  //     title: formData.title,
+  //     description: formData.description,
+  //     start_datetime,
+  //     end_datetime,
+  //     location_type: formData.platform,
+  //     agenda: formData.description,
+  //     invited_emails: attendees,
+  //   }
 
-    try {
-      await MeetingPost(payload)
-      setShowToast(true)
-      onMeetingCreated?.()
+  //   try {
+  //     await MeetingPost(payload)
+  //     setShowToast(true)
+  //     onMeetingCreated?.()
 
-      setTimeout(() => {
-        setShowToast(false)
-        onClose?.()
-        resetForm()
-      }, 2000)
-    } catch (err) {
-      console.error('Failed to create meeting:', err)
-    }
-  }
+  //     setTimeout(() => {
+  //       setShowToast(false)
+  //       onClose?.()
+  //       resetForm()
+  //     }, 2000)
+  //   } catch (err) {
+  //     console.error('Failed to create meeting:', err)
+  //   }
+  // }
 
   return (
     <>

@@ -20,16 +20,24 @@ const Dashboard = () => {
   const { meeting, loading, error } = useMeeting()
   const meetings = Array.isArray(meeting) ? meeting : meeting?.results || []
 
-  const now = new Date()
-  const nextWeek = new Date(now)
-  nextWeek.setDate(now.getDate() + 7)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const nextWeek = new Date(today)
+  nextWeek.setDate(today.getDate() + 7)
+  nextWeek.setHours(23, 59, 59, 999)
 
   const organizedMeetings = meetings.filter((item) => item.user_role === 'organizer')
   const participatingMeetings = meetings.filter((item) => item.user_role === 'participant')
   const upcomingMeetings = meetings
-    .filter((item) => item.status === 'scheduled' && new Date(item.start_datetime) >= now && new Date(item.start_datetime) <= nextWeek)
+    .filter((item) => {
+      const startDate = new Date(item.start_datetime)
+      return item.status === 'scheduled' && startDate >= today && startDate <= nextWeek
+    })
     .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
-  const upcomingToday = meetings.filter((item) => item.status === 'scheduled' && new Date(item.start_datetime).toDateString() === now.toDateString())
+  const upcomingToday = meetings.filter((item) => {
+    const startDate = new Date(item.start_datetime)
+    return item.status === 'scheduled' && startDate.toDateString() === today.toDateString()
+  })
   const cancelledMeetings = meetings.filter((item) => item.status === 'cancelled')
 
   return (

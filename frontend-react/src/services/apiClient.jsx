@@ -28,7 +28,7 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config
-        if (error.response.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
                 const refresh_token = localStorage.getItem('refresh_token');
@@ -38,7 +38,7 @@ api.interceptors.response.use(
                     window.location.href = '/'
                     return Promise.reject(error)
                 }
-                const response = await api.post('auth/jwt/refresh/', { refresh: refresh_token });
+                const response = await axios.post(`${baseURL}auth/jwt/refresh/`, { refresh: refresh_token });
                 localStorage.setItem('access_token', response.data.access);
                 originalRequest.headers.Authorization = `JWT ${response.data.access}`;
                 return api(originalRequest);

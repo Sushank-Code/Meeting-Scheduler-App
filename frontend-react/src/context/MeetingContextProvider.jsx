@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, createContext } from 'react'
-import { getMeeting, createMeeting } from '../services/meetingApi'
+import { getMeeting, createMeeting, getSingleMeeting } from '../services/meetingApi'
 import { useAuth } from './AuthContextProvider'
 
 const MeetingContext = createContext()
@@ -32,7 +32,7 @@ const MeetingContextProvider = ({ children }) => {
       const data = error.response?.data
       setError(data?.non_field_errors?.[0] || data?.detail || 'Failed to fetch meetings')
       setLoading(false)
-      setMeeting([])   
+      setMeeting([])
     }
     finally {
       setLoading(false)
@@ -50,7 +50,7 @@ const MeetingContextProvider = ({ children }) => {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await createMeeting(meetingdata)
       setMeeting((prev) => [...prev, response?.data]);
@@ -63,12 +63,32 @@ const MeetingContextProvider = ({ children }) => {
     }
   }
 
+  // single Meeting
+  const MeetingSingleGet = async (id) => {
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await getSingleMeeting(id)
+      return response?.data
+    } catch (error) {
+      const data = error.response?.data
+      setError(data?.non_field_errors?.[0] || data?.detail || 'Failed to fetch meetings')
+      setLoading(false)
+    }
+    finally{
+      setLoading(false)
+    }
+  }
+
   const value = {
     meeting,
     loading,
     error,
     MeetingGet,
-    MeetingPost
+    MeetingPost,
+    MeetingSingleGet,
   }
   return (
     <MeetingContext.Provider value={value}>

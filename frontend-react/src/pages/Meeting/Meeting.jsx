@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import CreateMeeting from '../../components/Meeting/CreateMeeting'
 import { useMeeting } from '../../context/MeetingContextProvider'
@@ -101,9 +102,9 @@ const Meeting = () => {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-                    <a className="text-xs font-semibold text-blue-600 transition hover:text-blue-700">
+                    <Link to={`/meeting/${item.meeting_id}`} className="text-xs font-semibold text-blue-600 transition hover:text-blue-700">
                       View Details
-                    </a>
+                    </Link>
 
                     {isCancelled ? (
                       <span className="text-xs font-semibold text-slate-400">Meeting cancelled</span>
@@ -128,7 +129,7 @@ const Meeting = () => {
         onMeetingCreated={MeetingGet}
       />
     </div>
-  )
+  ) 
 }
 
 export default Meeting

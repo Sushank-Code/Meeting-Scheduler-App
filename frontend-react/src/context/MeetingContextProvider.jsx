@@ -1,8 +1,25 @@
 import { useState, useEffect, useContext, createContext } from 'react'
-import { getMeeting, createMeeting, getSingleMeeting } from '../services/meetingApi'
+import {
+  getMeeting,
+  createMeeting,
+  getSingleMeeting,
+  cancelMeetingApi,
+  completeMeetingApi,
+} from '../services/meetingApi'
 import { useAuth } from './AuthContextProvider'
 
 const MeetingContext = createContext()
+
+const getErrorMessage = (error, fallback) => {
+  const data = error.response?.data
+  return (
+    data?.non_field_errors?.[0] ||
+    data?.error ||
+    data?.detail ||
+    error.message ||
+    fallback
+  )
+}
 
 const MeetingContextProvider = ({ children }) => {
   const { isLoggedIn } = useAuth()
@@ -10,6 +27,12 @@ const MeetingContextProvider = ({ children }) => {
   const [meeting, setMeeting] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  // single-meeting detail state 
+  const [singleMeeting, setSingleMeeting] = useState(null)
+  const [singleLoading, setSingleLoading] = useState(false)
+  const [singleError, setSingleError] = useState(null)
+  const [actionLoading, setActionLoading] = useState(null) // 'cancel' | 'complete' | null
 
   // get
   const MeetingGet = async () => {
@@ -29,8 +52,8 @@ const MeetingContextProvider = ({ children }) => {
       setLoading(false)
       setError(null)
     } catch (error) {
-      const data = error.response?.data
-      setError(data?.non_field_errors?.[0] || data?.detail || 'Failed to fetch meetings')
+      const message = getErrorMessage(error, 'Failed to fetch meeting')
+      setError(message)
       setLoading(false)
       setMeeting([])
     }
@@ -63,22 +86,70 @@ const MeetingContextProvider = ({ children }) => {
     }
   }
 
-  // single Meeting
+  //  single meeting retrieval 
   const MeetingSingleGet = async (id) => {
 
-    setLoading(true);
-    setError(null);
-    
+    if (!id) return null
+    setSingleLoading(true)
+    setSingleError(null)
+
     try {
       const response = await getSingleMeeting(id)
-      return response?.data
+      setSingleMeeting(response?.data)
+      setSingleLoading(false)
+      setSingleError(null)
     } catch (error) {
-      const data = error.response?.data
-      setError(data?.non_field_errors?.[0] || data?.detail || 'Failed to fetch meetings')
-      setLoading(false)
+      const message = getErrorMessage(error, 'Failed to fetch meeting')
+      setSingleError(message)
+      setSingleLoading(false)
+      setSingleMeeting(null)
+      throw error
+    } finally {
+      setSingleLoading(false)
     }
-    finally{
-      setLoading(false)
+  }
+
+  const clearSingleMeeting = () => {
+    setSingleMeeting(null)
+    setSingleError(null)
+    setSingleLoading(false)
+  }
+
+  // keep the list + detail in sync without forcing callers to refetch
+  const syncMeetingStatus = (id, status) => {
+    setSingleMeeting((prev) =>
+      prev && String(prev.meeting_id) === String(id) ? { ...prev, status } : prev
+    )
+    setMeeting((prev) =>
+      Array.isArray(prev)
+        ? prev.map((m) =>
+            String(m.meeting_id) === String(id) ? { ...m, status } : m
+          )
+        : prev
+    )
+  }
+
+  // cancel meeting 
+  const MeetingCancel = async (id) => {
+    setActionLoading('cancel')
+    try {
+      const response = await cancelMeetingApi(id)
+      syncMeetingStatus(id, 'cancelled')
+      return response?.data
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  // complete meeting 
+  const MeetingComplete = async (id) => {
+    setActionLoading('complete')
+    try {
+      const response = await completeMeetingApi(id)
+      syncMeetingStatus(id, 'completed')
+      return response?.data
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -86,9 +157,16 @@ const MeetingContextProvider = ({ children }) => {
     meeting,
     loading,
     error,
+    singleMeeting,
+    singleLoading,
+    singleError,
+    actionLoading,
     MeetingGet,
     MeetingPost,
     MeetingSingleGet,
+    MeetingCancel,
+    MeetingComplete,
+    clearSingleMeeting,
   }
   return (
     <MeetingContext.Provider value={value}>

@@ -7,11 +7,7 @@ import {
   getMeetingParticipants,
   addMeetingParticipant,
   deleteMeetingParticipant,
-  cancelMeetingApi,
-  completeMeetingApi,
 } from '../../services/meetingApi'
-
-// ─── helpers ────────────────────────────────────────────────────────────────
 
 const formatDateTime = (value) => {
   if (!value) return { date: 'Date not set', time: '' }
@@ -110,19 +106,24 @@ const RsvpBadge = ({ rsvp }) => {
   )
 }
 
-// ─── component ───────────────────────────────────────────────────────────────
+// -------
 
 const MeetingDetail = () => {
   const { id } = useParams()
-  const { MeetingSingleGet, MeetingGet } = useMeeting()
+  const {
+    singleMeeting: meetingData,
+    singleLoading: pageLoading,
+    singleError: pageError,
+    actionLoading,
+    MeetingSingleGet,
+    MeetingCancel,
+    MeetingComplete,
+    clearSingleMeeting,
+  } = useMeeting()
   const { user } = useAuth()
 
-  const [meetingData, setMeetingData] = useState(null)
   const [participants, setParticipants] = useState([])
-  const [pageLoading, setPageLoading] = useState(true)
-  const [pageError, setPageError] = useState(null)
   const [toast, setToast] = useState(null)
-  const [actionLoading, setActionLoading] = useState(null) // 'cancel' | 'complete'
   const [agendaOpen, setAgendaOpen] = useState(true)
   const [notesOpen, setNotesOpen] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
@@ -136,26 +137,24 @@ const MeetingDetail = () => {
     setToast({ msg, isError })
     setTimeout(() => setToast(null), 3200)
   }
-
-  const fetchMeeting = async () => {
-    setPageLoading(true)
-    setPageError(null)
+                      
+  // Meeting fetch lives in context; here we only load participants alongside it.
+  const fetchParticipants = async () => {
     try {
-      const [data, partRes] = await Promise.all([
-        MeetingSingleGet(id),
-        getMeetingParticipants(id).catch(() => ({ data: [] })),
-      ])
-      setMeetingData(data)
+      const partRes = await getMeetingParticipants(id)
       setParticipants(partRes?.data || [])
-    } catch (err) {
-      setPageError(err.message || 'Failed to load meeting')
-    } finally {
-      setPageLoading(false)
+    } catch {
+      setParticipants([])
     }
   }
 
   useEffect(() => {
-    if (id) fetchMeeting()
+    if (!id) return
+    MeetingSingleGet(id).catch(() => {
+      // error is stored in context as singleError
+    })
+    fetchParticipants()
+    return () => clearSingleMeeting?.()
   }, [id])
 
   const handleCopyLink = () => {
@@ -167,22 +166,19 @@ const MeetingDetail = () => {
   }
 
   const handleAction = async (actionType) => {
-    setActionLoading(actionType)
     try {
       if (actionType === 'cancel') {
-        await cancelMeetingApi(id)
+        await MeetingCancel(id)
         showToast('Meeting has been cancelled.')
       } else {
-        await completeMeetingApi(id)
+        await MeetingComplete(id)
         showToast('Meeting marked as completed.')
       }
-      await fetchMeeting()
-      MeetingGet?.()
+      // context already syncs single + list status; just refresh participants view
+      fetchParticipants()
     } catch (err) {
       const data = err.response?.data
       showToast(data?.error || data?.detail || `Failed to ${actionType} meeting`, true)
-    } finally {
-      setActionLoading(null)
     }
   }
 

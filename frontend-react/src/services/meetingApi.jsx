@@ -12,6 +12,14 @@ export const createMeeting = (body) => {
     return api.post(`api/v1/meeting/`, body)
 }
 
+export const updateMeeting = (id, body) => {
+    return api.patch(`api/v1/meeting/${id}/`, body)
+}
+
+export const deleteMeeting = (id) => {
+    return api.delete(`api/v1/meeting/${id}/`)
+}
+
 export const getMeetingParticipants = (id) => {
     return api.get(`api/v1/meeting/${id}/participants/`)
 }

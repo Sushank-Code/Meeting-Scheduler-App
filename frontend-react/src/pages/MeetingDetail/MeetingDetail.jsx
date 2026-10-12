@@ -8,41 +8,8 @@ import {
   addMeetingParticipant,
   deleteMeetingParticipant,
 } from '../../services/meetingApi'
-
-const formatDateTime = (value) => {
-  if (!value) return { date: 'Date not set', time: '' }
-  const d = new Date(value)
-  if (isNaN(d.getTime())) return { date: value, time: '' }
-  const now = new Date()
-  const isToday = d.toDateString() === now.toDateString()
-  const tomorrow = new Date(now)
-  tomorrow.setDate(now.getDate() + 1)
-  const isTomorrow = d.toDateString() === tomorrow.toDateString()
-
-  let dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-  if (isToday) dateStr = 'Today, ' + d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-  else if (isTomorrow) dateStr = 'Tomorrow, ' + d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-
-  const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-  return { date: dateStr, time: timeStr }
-}
-
-const formatDuration = (duration) => {
-  if (!duration) return null
-  if (/^\d+(\.\d+)?$/.test(String(duration))) {
-    const totalMinutes = Math.round(Number(duration) / 60)
-    const hours = Math.floor(totalMinutes / 60)
-    const minutes = totalMinutes % 60
-    if (hours && minutes) return `${hours}h ${minutes}m`
-    if (hours) return `${hours}h`
-    return `${minutes}m`
-  }
-  const [h, m] = String(duration).split(':').map(Number)
-  if (!Number.isFinite(h)) return duration
-  if (h && m) return `${h}h ${m}m`
-  if (h) return `${h}h`
-  return `${m}m`
-}
+import { formatDateTime, formatDuration } from '../../utils/format'
+import EditMeeting from '../../components/Meeting/EditMeeting'
 
 const getInitials = (email = '') => {
   const parts = email.split('@')[0].split(/[._-]/)
@@ -124,6 +91,7 @@ const MeetingDetail = () => {
 
   const [participants, setParticipants] = useState([])
   const [toast, setToast] = useState(null)
+  const [isEditOpen, setIsEditOpen] = useState(false)
   const [agendaOpen, setAgendaOpen] = useState(true)
   const [notesOpen, setNotesOpen] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
@@ -296,6 +264,15 @@ const MeetingDetail = () => {
             {/* Action Buttons — organizer only */}
             {isOrganizer && isScheduled && (
               <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(true)}
+                  disabled={!!actionLoading}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium shadow-sm hover:bg-blue-100 transition disabled:opacity-50 cursor-pointer"
+                >
+                  <SquarePen className="h-4 w-4" />
+                  Edit
+                </button>
                 <button
                   type="button"
                   onClick={() => handleAction('complete')}
@@ -700,6 +677,15 @@ const MeetingDetail = () => {
           )}
           <span>{toast.msg}</span>
         </div>
+      )}
+
+      {/* Edit modal — organizer only */}
+      {isOrganizer && isScheduled && (
+        <EditMeeting
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          meeting={meetingData}
+        />
       )}
     </div>
   )

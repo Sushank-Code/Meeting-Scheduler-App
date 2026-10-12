@@ -3,17 +3,7 @@ import { CalendarDays, Clock3, UserRoundCheck } from 'lucide-react'
 import MeetingCharts from '../../components/Charts/MeetingCharts'
 import { useAuth } from '../../context/AuthContextProvider'
 import { useMeeting } from '../../context/MeetingContextProvider'
-
-const formatDateTime = (value) => { 
-  if (!value) return 'Date not available'
-  try {
-    return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
-  } catch {
-    return value
-  }
-}
-
-const platformName = (locationType) => locationType === 'google_meet' ? 'Google Meet' : 'Zoom'
+import { formatDate, platformName } from '../../utils/format'
 
 const Dashboard = () => {
   const { user } = useAuth()
@@ -144,7 +134,7 @@ const Dashboard = () => {
                           {item.user_role === 'organizer' ? 'Organized by you' : 'Invited meeting'}
                         </p>
                       </td>
-                      <td className="px-4 py-4 text-slate-600">{formatDateTime(item.start_datetime)}</td>
+                      <td className="px-4 py-4 text-slate-600">{formatDate(item.start_datetime)}</td>
                       <td className="px-4 py-4 text-slate-600">{platformName(item.location_type)}</td>
                       <td className="px-4 py-4 text-right">
                         <Link to={`/meeting/${item.meeting_id}`} className="text-xs font-semibold text-blue-600 hover:text-blue-700">

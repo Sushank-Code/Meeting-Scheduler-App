@@ -3,24 +3,7 @@ import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import CreateMeeting from '../../components/Meeting/CreateMeeting'
 import { useMeeting } from '../../context/MeetingContextProvider'
-
-const formatDuration = (duration) => {
-  if (!duration) return null
-
-  if (/^\d+(\.\d+)?$/.test(String(duration))) {
-    const totalMinutes = Math.round(Number(duration) / 60)
-    const hours = Math.floor(totalMinutes / 60)
-    const minutes = totalMinutes % 60
-    return minutes ? `${hours}h ${minutes}m` : `${hours}h`
-  }
-
-  const [hours, minutes] = String(duration).split(':').map(Number)
-  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return duration
-
-  return minutes ? `${hours}h ${minutes}m` : `${hours}h`
-}
-
-const platformName = (locationType) => locationType === 'google_meet' ? 'Google Meet' : 'Zoom'
+import { formatDuration, platformName } from '../../utils/format'
 
 const statusClasses = {
   scheduled: 'bg-emerald-50 text-emerald-700 border-emerald-200',

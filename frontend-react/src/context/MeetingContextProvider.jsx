@@ -2,6 +2,8 @@ import { useState, useEffect, useContext, createContext } from 'react'
 import {
   getMeeting,
   createMeeting,
+  updateMeeting,
+  deleteMeeting,
   getSingleMeeting,
   cancelMeetingApi,
   completeMeetingApi,
@@ -78,6 +80,43 @@ const MeetingContextProvider = ({ children }) => {
       const response = await createMeeting(meetingdata)
       setMeeting((prev) => [...prev, response?.data]);
       return response?.data
+    } catch (error) {
+      throw error
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
+  // update
+  const MeetingUpdate = async (id, meetingdata) => {
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await updateMeeting(id, meetingdata)
+      setMeeting((prev) => prev.map((m) => String(m.meeting_id) === String(id) ? response?.data : m));
+      setSingleMeeting((prev) => prev && String(prev.meeting_id) === String(id) ? response?.data : prev);
+      return response?.data
+    } catch (error) {
+      throw error
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
+  // delete
+  const MeetingDelete = async (id) => {
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await deleteMeeting(id)
+      setMeeting((prev) => prev.filter((m) => String(m.meeting_id) !== String(id)));
+      setSingleMeeting((prev) => prev && String(prev.meeting_id) === String(id) ? null : prev);
     } catch (error) {
       throw error
     }
@@ -163,6 +202,8 @@ const MeetingContextProvider = ({ children }) => {
     actionLoading,
     MeetingGet,
     MeetingPost,
+    MeetingUpdate,
+    MeetingDelete,
     MeetingSingleGet,
     MeetingCancel,
     MeetingComplete,

@@ -1,9 +1,4 @@
-// Shared date / duration / platform formatting helpers.
-// Import from here instead of redefining these in every page.
-
 /**
- * Rich date-time formatter for detail views.
- * Returns { date, time } with Today / Tomorrow awareness.
  * Example: formatDateTime('2026-10-10T10:00:00')
  *   → { date: 'Today, October 10, 2026', time: '10:00 AM' }
  */

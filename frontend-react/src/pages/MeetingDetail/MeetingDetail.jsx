@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Calendar, Check, ChevronDown, ChevronRight, CircleCheck, CircleX, ClipboardList, Clock, Copy, ExternalLink, Link2, LoaderCircle, Plus, Search, Send, SquarePen, Trash, TriangleAlert, Users, Video, X } from 'lucide-react';
 import { useMeeting } from '../../context/MeetingContextProvider'
 import { useAuth } from '../../context/AuthContextProvider'
@@ -77,6 +77,7 @@ const RsvpBadge = ({ rsvp }) => {
 
 const MeetingDetail = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const {
     singleMeeting: meetingData,
     singleLoading: pageLoading,
@@ -85,6 +86,7 @@ const MeetingDetail = () => {
     MeetingSingleGet,
     MeetingCancel,
     MeetingComplete,
+    MeetingDelete,
     clearSingleMeeting,
   } = useMeeting()
   const { user } = useAuth()
@@ -92,6 +94,7 @@ const MeetingDetail = () => {
   const [participants, setParticipants] = useState([])
   const [toast, setToast] = useState(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [agendaOpen, setAgendaOpen] = useState(true)
   const [notesOpen, setNotesOpen] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
@@ -105,7 +108,7 @@ const MeetingDetail = () => {
     setToast({ msg, isError })
     setTimeout(() => setToast(null), 3200)
   }
-                      
+
   // Meeting fetch lives in context; here we only load participants alongside it.
   const fetchParticipants = async () => {
     try {
@@ -147,6 +150,20 @@ const MeetingDetail = () => {
     } catch (err) {
       const data = err.response?.data
       showToast(data?.error || data?.detail || `Failed to ${actionType} meeting`, true)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Permanently delete "${meetingData?.title}"? This cannot be undone.`)) return
+    setIsDeleting(true)
+    try {
+      await MeetingDelete(id)
+      navigate('/meeting')
+    } catch (err) {
+      const data = err.response?.data
+      showToast(data?.detail || data?.error || 'Failed to delete meeting', true)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -214,7 +231,8 @@ const MeetingDetail = () => {
   if (!meetingData) return null
 
   const { date: startDate, time: startTime } = formatDateTime(meetingData.start_datetime)
-  const { time: endTime } = formatDateTime(meetingData.end_datetime)
+  const { date: endDate, time: endTime } = formatDateTime(meetingData.end_datetime)
+  const isMultiDay = Boolean(endDate) && endDate !== startDate
   const duration = formatDuration(meetingData.duration)
   const isCancelled = meetingData.status === 'cancelled'
   const isScheduled = meetingData.status === 'scheduled'
@@ -291,6 +309,19 @@ const MeetingDetail = () => {
                   <CircleX className="h-4 w-4" />
                   {actionLoading === 'cancel' ? 'Cancelling...' : 'Cancel Meeting'}
                 </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={!!actionLoading || isDeleting}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 text-white text-sm font-medium shadow-sm hover:bg-red-700 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isDeleting ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash className="h-4 w-4" />
+                  )}
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </button>
               </div>
             )}
           </div>
@@ -315,6 +346,9 @@ const MeetingDetail = () => {
                     <p className="text-sm text-slate-500">
                       {startTime}{endTime ? ` – ${endTime}` : ''}{duration ? ` (${duration})` : ''}
                     </p>
+                    {isMultiDay && (
+                      <p className="text-xs text-slate-500">Ends {endDate}</p>
+                    )}
                   </div>
                 </div>
                 {/* Platform badge */}

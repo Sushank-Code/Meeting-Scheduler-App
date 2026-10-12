@@ -279,9 +279,11 @@ const MeetingDetail = () => {
               </div>
             </div>
 
-            {/* Action Buttons — organizer only */}
-            {isOrganizer && isScheduled && (
+            {/* Action Buttons — organizer only (delete stays visible after cancel/complete) */}
+            {isOrganizer && (
               <div className="flex flex-wrap items-center gap-2 shrink-0">
+                {isScheduled && (
+                  <>
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(true)}
@@ -309,6 +311,8 @@ const MeetingDetail = () => {
                   <CircleX className="h-4 w-4" />
                   {actionLoading === 'cancel' ? 'Cancelling...' : 'Cancel Meeting'}
                 </button>
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={handleDelete}
@@ -358,8 +362,13 @@ const MeetingDetail = () => {
                 </span>
               </div>
 
-              {/* Meeting link banner */}
-              {meetingData.meeting_link ? (
+              {/* Meeting link banner — hidden once cancelled */}
+              {isCancelled ? (
+                <div className="flex items-center gap-3 rounded-xl border border-red-100 bg-red-50/60 px-4 py-3 text-sm text-red-700">
+                  <CircleX className="h-4 w-4 shrink-0 text-red-400" />
+                  This meeting was cancelled — the video link is no longer active.
+                </div>
+              ) : meetingData.meeting_link ? (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">

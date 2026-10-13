@@ -256,16 +256,28 @@ const Rsvp = () => {
           ) : (
             canRespond && (
               <div className="mt-8">
-                <p className="text-center text-lg font-bold text-slate-900">Will you be attending?</p>
-                <p className="mt-1 text-center text-sm text-slate-500">
-                  Your response will notify the organizer immediately.
-                </p>
+                {myStatus === 'accepted' ? (
+                  <p className="flex items-center justify-center gap-2 text-center text-sm font-bold text-emerald-700">
+                    <CircleCheck className="h-5 w-5" /> You're going — you accepted this invitation.
+                  </p>
+                ) : myStatus === 'declined' ? (
+                  <p className="flex items-center justify-center gap-2 text-center text-sm font-bold text-red-600">
+                    <X className="h-5 w-5" strokeWidth={3} /> You've declined this invitation.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-center text-lg font-bold text-slate-900">Will you be attending?</p>
+                    <p className="mt-1 text-center text-sm text-slate-500">
+                      Your response will notify the organizer immediately.
+                    </p>
+                  </>
+                )}
                 <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
                     disabled={!!responding}
                     onClick={() => handleRespond('accepted')}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition disabled:opacity-50 cursor-pointer"
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition disabled:opacity-50 cursor-pointer ${myStatus === 'accepted' ? 'ring-2 ring-emerald-800 ring-offset-2' : ''}`}
                   >
                     {responding === 'accepted'
                       ? <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -276,7 +288,10 @@ const Rsvp = () => {
                     type="button"
                     disabled={!!responding}
                     onClick={() => handleRespond('declined')}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-5 py-3.5 text-sm font-bold text-red-600 hover:bg-red-50 transition disabled:opacity-50 cursor-pointer"
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3.5 text-sm font-bold transition disabled:opacity-50 cursor-pointer ${myStatus === 'declined'
+                      ? 'border-red-600 bg-red-600 text-white shadow-sm hover:bg-red-700 ring-2 ring-red-300 ring-offset-2'
+                      : 'border-red-200 bg-white text-red-600 hover:bg-red-50'
+                      }`}
                   >
                     {responding === 'declined'
                       ? <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -284,6 +299,11 @@ const Rsvp = () => {
                     {responding === 'declined' ? 'Declining...' : 'Decline'}
                   </button>
                 </div>
+                {myStatus !== 'pending' && (
+                  <p className="mt-3 text-center text-xs text-slate-400">
+                    Changed your mind? Choose the other option — your response updates instantly.
+                  </p>
+                )}
               </div>
             )
           )}
@@ -300,10 +320,6 @@ const Rsvp = () => {
           >
             Google Calendar
           </a>
-          <span className="mx-1.5 text-slate-300">•</span>
-          <span>Apple iCal</span>
-          <span className="mx-1.5 text-slate-300">•</span>
-          <span>Outlook</span>
         </div>
       </div>
 

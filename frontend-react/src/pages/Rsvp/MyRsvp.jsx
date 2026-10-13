@@ -176,24 +176,32 @@ const MyRsvp = () => {
                     >
                       View Invite
                     </Link>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => handleRespond(m.meeting_id, 'accepted')}
-                      title="Accept invitation"
-                      className="p-2 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-50 cursor-pointer"
-                    >
-                      {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" strokeWidth={3} />}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => handleRespond(m.meeting_id, 'declined')}
-                      title="Decline invitation"
-                      className="p-2 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition disabled:opacity-50 cursor-pointer"
-                    >
-                      <X className="h-4 w-4" strokeWidth={3} />
-                    </button>
+                    {status === 'pending' ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => handleRespond(m.meeting_id, 'accepted')}
+                          title="Accept invitation"
+                          className="p-2 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-50 cursor-pointer"
+                        >
+                          {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" strokeWidth={3} />}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => handleRespond(m.meeting_id, 'declined')}
+                          title="Decline invitation"
+                          className="p-2 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition disabled:opacity-50 cursor-pointer"
+                        >
+                          <X className="h-4 w-4" strokeWidth={3} />
+                        </button>
+                      </>
+                    ) : (
+                      <span className={`px-1 text-xs font-semibold ${status === 'accepted' ? 'text-emerald-700' : 'text-red-600'}`}>
+                        You have {status}
+                      </span>
+                    )}
                   </div>
                 </article>
               )

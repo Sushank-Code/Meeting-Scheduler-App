@@ -418,12 +418,14 @@ const MeetingDetail = () => {
 
               {/* Organizer line */}
               <div className="flex items-center gap-2.5 pt-1 border-t border-slate-100">
-                <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${avatarColor(user?.email || '')}`}>
-                  {getInitials(user?.email || '')}
+                <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${avatarColor(meetingData?.organizer_email || '')}`}>
+                  {getInitials(meetingData?.organizer_email || '')}
                 </div>
                 <span className="text-xs text-slate-500">
                   {isOrganizer ? (
                     <>Organized by <strong className="text-slate-800 font-semibold">{user?.first_name || user?.email?.split('@')[0]}</strong> (you)</>
+                  ) : meetingData.organizer_name || meetingData.organizer_email ? (
+                    <>Invited by <strong className="text-slate-800 font-semibold">{meetingData.organizer_name || meetingData.organizer_email}</strong></>
                   ) : (
                     'You are invited to this meeting'
                   )}

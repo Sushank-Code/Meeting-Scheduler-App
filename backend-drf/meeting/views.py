@@ -47,7 +47,7 @@ class MeetingView(viewsets.ModelViewSet):
         participated = Meeting.objects.filter(
             participant__email__iexact=user.email
         )
-        return (organized | participated).distinct()
+        return (organized | participated).distinct().select_related('organizer')
 
     @action(methods=['post'], detail=True, url_path='cancel')
     def cancel_meeting(self, request, pk=None):

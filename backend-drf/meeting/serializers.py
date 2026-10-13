@@ -12,12 +12,15 @@ class MeetingSerializer(serializers.ModelSerializer):
         write_only=True
     )
     user_role = serializers.SerializerMethodField()     # organizer or participant
+    organizer_email = serializers.EmailField(source='organizer.email', read_only=True)
+    organizer_name = serializers.SerializerMethodField()
+    organizer_avatar = serializers.CharField(source='organizer.profile_picture', read_only=True)
 
     class Meta:
         model = Meeting
-        fields = ['meeting_id', 'title', 'description', 'start_datetime', 'end_datetime','duration','location_type','meeting_link', 'status', 'agenda', 'meeting_notes', 'created_at', 'updated_at', 'invited_emails','user_role']
+        fields = ['meeting_id', 'title', 'description', 'start_datetime', 'end_datetime','duration','location_type','meeting_link', 'status', 'agenda', 'meeting_notes', 'created_at', 'updated_at', 'invited_emails','user_role','organizer_email','organizer_name','organizer_avatar']
 
-        read_only_fields = ['meeting_id','duration','meeting_link','status','created_at','updated_at','user_role']
+        read_only_fields = ['meeting_id','duration','meeting_link','status','created_at','updated_at','user_role','organizer_email','organizer_name','organizer_avatar']
          
         extra_kwargs = {
             'location_type': {'required': False},
@@ -124,6 +127,10 @@ class MeetingSerializer(serializers.ModelSerializer):
         if request and obj.organizer == request.user:
             return 'organizer'
         return 'participant'
+
+    def get_organizer_name(self, obj):
+        full_name = f"{obj.organizer.first_name} {obj.organizer.last_name}".strip()
+        return full_name or obj.organizer.username
 
 class ParticipantSerializer(serializers.ModelSerializer):
 

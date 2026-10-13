@@ -156,6 +156,11 @@ const MyRsvp = () => {
                       <p className="mt-1 text-xs text-slate-500">
                         {date} · {time}{endTime ? ` – ${endTime}` : ''}
                       </p>
+                      {(m.organizer_name || m.organizer_email) && (
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          Invited by <span className="font-semibold text-slate-700">{m.organizer_name || m.organizer_email}</span>
+                        </p>
+                      )}
                       <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
                         <Video className="h-3.5 w-3.5 text-slate-400" />
                         {platformName(m.location_type)}

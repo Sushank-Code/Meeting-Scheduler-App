@@ -3,12 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Calendar, Check, ChevronDown, ChevronRight, CircleCheck, CircleX, ClipboardList, Clock, Copy, ExternalLink, Link2, LoaderCircle, Plus, Search, Send, SquarePen, Trash, TriangleAlert, Users, Video, X } from 'lucide-react';
 import { useMeeting } from '../../context/MeetingContextProvider'
 import { useAuth } from '../../context/AuthContextProvider'
-import {
-  getMeetingParticipants,
-  addMeetingParticipant,
-  deleteMeetingParticipant,
-} from '../../services/meetingApi'
 import { formatDateTime, formatDuration } from '../../utils/format'
+import { useParticipant } from '../../context/ParticipantContextProvider'
 import EditMeeting from '../../components/Meeting/EditMeeting'
 
 const getInitials = (email = '') => {
@@ -89,9 +85,16 @@ const MeetingDetail = () => {
     MeetingDelete,
     clearSingleMeeting,
   } = useMeeting()
+  const {
+    participants,
+    loading: participantsLoading,
+    ParticipantGet,
+    ParticipantAdd,
+    ParticipantRemove,
+    clearParticipants,
+  } = useParticipant()
   const { user } = useAuth()
 
-  const [participants, setParticipants] = useState([])
   const [toast, setToast] = useState(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -99,24 +102,13 @@ const MeetingDetail = () => {
   const [notesOpen, setNotesOpen] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
 
-  // Participant filtering & quick invite
+  // Participant search & quick invite input (UI state only)
   const [searchParticipant, setSearchParticipant] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteLoading, setInviteLoading] = useState(false)
 
   const showToast = (msg, isError = false) => {
     setToast({ msg, isError })
     setTimeout(() => setToast(null), 3200)
-  }
-
-  // Meeting fetch lives in context; here we only load participants alongside it.
-  const fetchParticipants = async () => {
-    try {
-      const partRes = await getMeetingParticipants(id)
-      setParticipants(partRes?.data || [])
-    } catch {
-      setParticipants([])
-    }
   }
 
   useEffect(() => {
@@ -124,8 +116,13 @@ const MeetingDetail = () => {
     MeetingSingleGet(id).catch(() => {
       // error is stored in context as singleError
     })
-    fetchParticipants()
-    return () => clearSingleMeeting?.()
+    ParticipantGet(id).catch(() => {
+      // error is stored in participant context
+    })
+    return () => {
+      clearSingleMeeting?.()
+      clearParticipants?.()
+    }
   }, [id])
 
   const handleCopyLink = () => {
@@ -146,7 +143,7 @@ const MeetingDetail = () => {
         showToast('Meeting marked as completed.')
       }
       // context already syncs single + list status; just refresh participants view
-      fetchParticipants()
+      ParticipantGet(id).catch(() => { })
     } catch (err) {
       const data = err.response?.data
       showToast(data?.error || data?.detail || `Failed to ${actionType} meeting`, true)
@@ -171,27 +168,21 @@ const MeetingDetail = () => {
     e.preventDefault()
     const email = inviteEmail.trim()
     if (!email) return
-    setInviteLoading(true)
     try {
-      await addMeetingParticipant(id, email)
+      await ParticipantAdd(id, email)
       showToast(`Invitation sent to ${email}`)
       setInviteEmail('')
-      const partRes = await getMeetingParticipants(id)
-      setParticipants(partRes?.data || [])
     } catch (err) {
       const data = err.response?.data
       showToast(data?.email?.[0] || data?.detail || 'Failed to invite participant', true)
-    } finally {
-      setInviteLoading(false)
     }
   }
 
   const handleRemoveParticipant = async (participantId, email) => {
     if (!window.confirm(`Remove ${email} from this meeting?`)) return
     try {
-      await deleteMeetingParticipant(id, participantId)
+      await ParticipantRemove(id, participantId)
       showToast(`Removed ${email}`)
-      setParticipants((prev) => prev.filter((p) => p.id !== participantId))
     } catch (err) {
       const data = err.response?.data
       showToast(data?.detail || 'Failed to remove participant', true)
@@ -284,33 +275,33 @@ const MeetingDetail = () => {
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 {isScheduled && (
                   <>
-                <button
-                  type="button"
-                  onClick={() => setIsEditOpen(true)}
-                  disabled={!!actionLoading}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium shadow-sm hover:bg-blue-100 transition disabled:opacity-50 cursor-pointer"
-                >
-                  <SquarePen className="h-4 w-4" />
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAction('complete')}
-                  disabled={!!actionLoading}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-medium shadow-sm hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
-                >
-                  <CircleCheck className="h-4 w-4 text-emerald-600" />
-                  {actionLoading === 'complete' ? 'Saving...' : 'Mark Complete'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAction('cancel')}
-                  disabled={!!actionLoading}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-medium shadow-sm hover:bg-red-100 transition disabled:opacity-50 cursor-pointer"
-                >
-                  <CircleX className="h-4 w-4" />
-                  {actionLoading === 'cancel' ? 'Cancelling...' : 'Cancel Meeting'}
-                </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditOpen(true)}
+                      disabled={!!actionLoading}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium shadow-sm hover:bg-blue-100 transition disabled:opacity-50 cursor-pointer"
+                    >
+                      <SquarePen className="h-4 w-4" />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAction('complete')}
+                      disabled={!!actionLoading}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-medium shadow-sm hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
+                    >
+                      <CircleCheck className="h-4 w-4 text-emerald-600" />
+                      {actionLoading === 'complete' ? 'Saving...' : 'Mark Complete'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAction('cancel')}
+                      disabled={!!actionLoading}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-medium shadow-sm hover:bg-red-100 transition disabled:opacity-50 cursor-pointer"
+                    >
+                      <CircleX className="h-4 w-4" />
+                      {actionLoading === 'cancel' ? 'Cancelling...' : 'Cancel Meeting'}
+                    </button>
                   </>
                 )}
                 <button
@@ -646,10 +637,10 @@ const MeetingDetail = () => {
                   />
                   <button
                     type="submit"
-                    disabled={inviteLoading}
+                    disabled={participantsLoading}
                     className="w-full sm:w-auto px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition flex items-center justify-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer"
                   >
-                    {inviteLoading ? (
+                    {participantsLoading ? (
                       <>
                         <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
                         <span>Inviting...</span>

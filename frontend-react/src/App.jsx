@@ -1,6 +1,6 @@
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './Layout'
-import { Home, GoogleCallback, Dashboard, Meeting, Login, MeetingDetail } from './pages/PageCombiner'
+import { Home, GoogleCallback, Dashboard, Meeting, Login, MeetingDetail, MyRsvp, Rsvp } from './pages/PageCombiner'
 import PrivateRoute from './routes/PrivateRoute'
 
 const router = createBrowserRouter(
@@ -12,6 +12,8 @@ const router = createBrowserRouter(
             <Route path='dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path='meeting' element={<PrivateRoute><Meeting /></PrivateRoute>} />
             <Route path='meeting/:id' element={<PrivateRoute><MeetingDetail /></PrivateRoute>} />
+            <Route path='my-rsvp' element={<PrivateRoute><MyRsvp /></PrivateRoute>} />
+            <Route path='rsvp/:id' element={<PrivateRoute><Rsvp /></PrivateRoute>} />
         </Route>
     )
 )

@@ -1,11 +1,14 @@
 import AuthContextProvider from './AuthContextProvider'
 import MeetingContextProvider from './MeetingContextProvider'
+import ParticipantContextProvider from './ParticipantContextProvider'
 
 const ContextCombiner = ({ children }) => {
   return (
     <AuthContextProvider>
       <MeetingContextProvider>
-        {children}
+        <ParticipantContextProvider>
+          {children}
+        </ParticipantContextProvider>
       </MeetingContextProvider>
     </AuthContextProvider>
   )

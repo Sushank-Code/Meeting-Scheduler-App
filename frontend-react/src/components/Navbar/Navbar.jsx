@@ -96,6 +96,13 @@ const Navbar = () => {
                   >
                     Meetings
                   </Link>
+                  <Link
+                    to="/my-rsvp"
+                    onClick={() => setUserDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#2563EB]"
+                  >
+                    My RSVP
+                  </Link>
                   <button
                     type="button"
                     onClick={() => {
@@ -161,6 +168,13 @@ const Navbar = () => {
                 className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md"
               >
                 Meetings
+              </Link>
+              <Link
+                to="/my-rsvp"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              >
+                My RSVP
               </Link>
               <div className="pt-3 border-t border-gray-100">
                 <button

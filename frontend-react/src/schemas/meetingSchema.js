@@ -47,6 +47,4 @@ export const meetingSchema = meetingBase
   })
   .superRefine(ensureChronology)
 
-// Update: same fields but no location_type (backend forbids changing it
-// after creation) and no invited_emails (managed on the detail page).
 export const meetingUpdateSchema = meetingBase.superRefine(ensureChronology)

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, createContext } from 'react'
-import { googleAuth, googleAuthorization, getUserProfile } from '../services/authApi'
+import { googleAuth, googleAuthorization, getUserProfile, updateUserProfile, deleteUserAccount } from '../services/authApi'
 
 // creating context 
 const AuthContext = createContext()
@@ -66,6 +66,17 @@ const AuthContextProvider = ({ children }) => {
         setisLoggedIn(false);
     };
 
+    const ProfileUpdate = async (data) => {
+        const response = await updateUserProfile(data)
+        setUser(response.data)
+        return response.data
+    }
+
+    const AccountDelete = async () => {
+        await deleteUserAccount()
+        logout()
+    }
+
     const value = {
         user,
         setUser,
@@ -74,6 +85,8 @@ const AuthContextProvider = ({ children }) => {
         getMe,
         SignupWithGoogle,
         CompleteGoogleLogin,
+        ProfileUpdate,
+        AccountDelete,
         logout,
     }
     return (

@@ -83,6 +83,13 @@ const Navbar = () => {
                     <p className="text-xs font-semibold text-gray-800 truncate">{user?.email}</p>
                   </div>
                   <Link
+                    to="/profile"
+                    onClick={() => setUserDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#2563EB]"
+                  >
+                    Profile
+                  </Link>
+                  <Link
                     to="/dashboard"
                     onClick={() => setUserDropdownOpen(false)}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#2563EB]"
@@ -155,6 +162,13 @@ const Navbar = () => {
                 <p className="text-xs text-gray-500">Signed in as</p>
                 <p className="text-sm font-semibold text-gray-800 truncate">{user?.email}</p>
               </div>
+              <Link
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              >
+                Profile
+              </Link>
               <Link
                 to="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}

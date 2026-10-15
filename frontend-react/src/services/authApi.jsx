@@ -12,3 +12,11 @@ export const googleAuthorization = ({ code, state }) => {
 export const getUserProfile = () => {
     return api.get(`auth/users/me/`)
 }
+
+export const updateUserProfile = (body) => {
+    return api.patch(`auth/users/me/`, body)
+}
+
+export const deleteUserAccount = () => {
+    return api.delete(`auth/users/me/`)
+}

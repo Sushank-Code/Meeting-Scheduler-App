@@ -14,12 +14,6 @@ export const profileSchema = z.object({
   last_name: z
     .string()
     .trim()
-    .min(1, 'Last name is required.')
-    .max(50, 'Last name cannot exceed 50 characters.'),
-  profile_picture: z
-    .string()
-    .trim()
-    .max(500, 'Image URL is too long.')
-    .refine((v) => v === '' || z.url().safeParse(v).success, 'Enter a valid image URL.')
+    .max(50, 'Last name cannot exceed 50 characters.')
     .optional(),
 })

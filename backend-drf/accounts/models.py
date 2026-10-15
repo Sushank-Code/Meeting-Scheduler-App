@@ -36,7 +36,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     email = models.EmailField(max_length=254,unique=True)
 
     first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50, blank=True, default="")
     provider = models.CharField(max_length=50, blank=True, default="")
     provider_id = models.CharField(max_length=255, blank=True, default="")
     profile_picture = models.URLField(blank=True, default="")

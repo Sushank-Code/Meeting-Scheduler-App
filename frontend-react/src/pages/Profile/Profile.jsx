@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { CircleCheck, LoaderCircle, Trash, TriangleAlert } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useAuth } from '../../context/AuthContextProvider'
 import { profileSchema } from '../../schemas/profileSchema'
 
@@ -30,10 +30,10 @@ const Profile = () => {
     setTimeout(() => setToast(null), 3200)
   }
 
-  const { register, handleSubmit, control, setError, reset,
+  const { register, handleSubmit, setError, reset,
     formState: { errors, isSubmitting }, } = useForm({
       resolver: zodResolver(profileSchema),
-      defaultValues: { username: '', first_name: '', last_name: '', profile_picture: '' },
+      defaultValues: { username: '', first_name: '', last_name: '' },
     })
 
   // prefill once the user loads
@@ -43,14 +43,11 @@ const Profile = () => {
       username: user.username || '',
       first_name: user.first_name || '',
       last_name: user.last_name || '',
-      profile_picture: user.profile_picture || '',
     })
   }, [user, reset])
 
-  const picturePreview = useWatch({ control, name: 'profile_picture' })
-
   const applyApiErrors = (data) => {
-    const known = ['username', 'first_name', 'last_name', 'profile_picture']
+    const known = ['username', 'first_name', 'last_name']
     if (!data || typeof data !== 'object') {
       showToast('Unable to update profile. Please try again.', true)
       return
@@ -70,8 +67,7 @@ const Profile = () => {
       await ProfileUpdate({
         username: data.username,
         first_name: data.first_name,
-        last_name: data.last_name,
-        profile_picture: data.profile_picture || '',
+        last_name: data.last_name || '',
       })
       showToast('Profile updated successfully.')
     } catch (error) {
@@ -115,9 +111,9 @@ const Profile = () => {
         {/* Details card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-4 pb-5 border-b border-slate-100">
-            {(picturePreview || user.profile_picture) ? (
+            {user.profile_picture ? (
               <img
-                src={picturePreview || user.profile_picture}
+                src={user.profile_picture}
                 alt={user.username}
                 className="h-16 w-16 rounded-full object-cover ring-2 ring-blue-100"
               />
@@ -167,7 +163,7 @@ const Profile = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700" htmlFor="profile-last">
-                  Last name <span className="text-red-500">*</span>
+                  Last name <span className="text-xs font-normal text-slate-400">(Optional)</span>
                 </label>
                 <input
                   id="profile-last"
@@ -178,18 +174,6 @@ const Profile = () => {
                 />
                 <FieldError message={errors.last_name?.message} />
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700" htmlFor="profile-picture">
-                Profile picture <span className="text-xs font-normal text-slate-400">(image URL, optional)</span>
-              </label>
-              <input
-                id="profile-picture"
-                className={`${inputClass(errors.profile_picture)} mt-1.5 h-11 px-3.5`}
-                placeholder="https://..."
-                {...register('profile_picture')}
-              />
-              <FieldError message={errors.profile_picture?.message} />
             </div>
             <div className="flex justify-end pt-1">
               <button

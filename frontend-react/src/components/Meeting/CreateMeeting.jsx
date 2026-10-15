@@ -313,7 +313,7 @@ const CreateMeeting = ({ isOpen, onClose, onMeetingCreated }) => {
                 Cancel
               </button>
               <button
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                 disabled={isSubmitting}
                 type="submit"
               >

@@ -4,7 +4,7 @@ import { googleAuth, googleAuthorization, getUserProfile, updateUserProfile, del
 // creating context 
 const AuthContext = createContext()
 
-const AuthContextProvider = ({ children }) => { 
+const AuthContextProvider = ({ children }) => {
     const [user, setUser] = useState(null)
     const [isLoggedIn, setisLoggedIn] = useState(!!localStorage.getItem('access_token'))
 
@@ -23,7 +23,7 @@ const AuthContextProvider = ({ children }) => {
         if (localStorage.getItem('access_token')) {
             getMe()
         }
-        else{
+        else {
             setUser(null)
             setisLoggedIn(false)
         }

@@ -11,8 +11,6 @@ import RsvpStatusBadge from '../../components/Rsvp/RsvpStatusBadge'
 const initials = (name = '') =>
   name.trim().split(/[\s._@-]+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join('') || '?'
 
-// backend stores UTC — the browser already renders it in local time,
-// so this is just the label shown next to the converted times
 const localTz = () => {
   try {
     return new Date().toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop()

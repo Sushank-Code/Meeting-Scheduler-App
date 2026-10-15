@@ -26,14 +26,11 @@ const MyRsvp = () => {
     setTimeout(() => setToast(null), 3200)
   }
 
-  // meetings where I am invited (not the organizer)
   const invitations = useMemo(() => {
     const list = Array.isArray(meeting) ? meeting : meeting?.results || []
     return list.filter((m) => m.user_role === 'participant')
   }, [meeting])
 
-  // the list API carries no per-user RSVP state, so resolve mine
-  // from each meeting's participant rows (read-only, no context state touched)
   useEffect(() => {
     if (!invitations.length || !user?.email) return
     let cancelled = false

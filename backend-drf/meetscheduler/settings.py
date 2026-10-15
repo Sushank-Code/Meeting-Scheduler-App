@@ -218,6 +218,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {
 SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["id_token", "scope", "refresh_token"]
 # Extra data Found in social_auth - User Social auths
 SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['username','first_name','last_name',]
+# this pipeline will never overwrite fields included on every google login after user update profile
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',        

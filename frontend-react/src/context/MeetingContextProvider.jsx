@@ -162,8 +162,8 @@ const MeetingContextProvider = ({ children }) => {
     setMeeting((prev) =>
       Array.isArray(prev)
         ? prev.map((m) =>
-            String(m.meeting_id) === String(id) ? { ...m, status } : m
-          )
+          String(m.meeting_id) === String(id) ? { ...m, status } : m
+        )
         : prev
     )
   }
